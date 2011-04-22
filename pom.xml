@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+        xmlns="http://maven.apache.org/POM/4.0.0"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.zenika.systemmanager</groupId>
+    <artifactId>parent</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>Flex/OSGi System Manager</name>
+
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <properties>
+        <!-- Flex -->
+        <flex.version>4.0.0.14159</flex.version>
+        <flexmojos.version>3.6.1</flexmojos.version>
+
+        <!-- OSGi -->
+        <osgi.core.version>4.2.0</osgi.core.version>
+        <osgi.compendium.version>4.2.0</osgi.compendium.version>
+        <ipojo.version>1.8.0</ipojo.version>
+    </properties>
+
+    <modules>
+        <module>commons</module>
+        <module>application</module>
+        <module>console</module>
+        <module>general</module>
+        <module>memory</module>
+        <module>cpu</module>
+        <module>test</module>
+        <module>test2</module>
+        <module>scope</module>
+        <module>async</module>
+    </modules>
+
+    <repositories>
+        <repository>
+            <id>flex-repository</id>
+            <url>http://repository.sonatype.org/content/groups/flexgroup/</url>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>flex-mojos-repository</id>
+            <url>http://repository.sonatype.org/content/groups/flexgroup/</url>
+        </pluginRepository>
+    </pluginRepositories>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.osgi</groupId>
+                <artifactId>org.osgi.compendium</artifactId>
+                <version>${osgi.compendium.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.osgi</groupId>
+                <artifactId>org.osgi.core</artifactId>
+                <version>${osgi.core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.graniteds-osgi</groupId>
+                <artifactId>granite-core</artifactId>
+                <version>2.2.0.SP1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>org.apache.felix.ipojo.annotations</artifactId>
+                <version>${ipojo.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>org.apache.felix.ipojo</artifactId>
+                <version>${ipojo.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.sonatype.flexmojos</groupId>
+                    <artifactId>flexmojos-maven-plugin</artifactId>
+                    <version>${flexmojos.version}</version>
+                    <extensions>true</extensions>
+                    <dependencies>
+                        <dependency>
+                            <groupId>com.adobe.flex</groupId>
+                            <artifactId>compiler</artifactId>
+                            <version>${flex.version}</version>
+                            <type>pom</type>
+                        </dependency>
+                    </dependencies>
+                    <configuration>
+                        <debug>true</debug>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.felix</groupId>
+                    <artifactId>maven-ipojo-plugin</artifactId>
+                    <version>${ipojo.version}</version>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <configuration>
+                        <source>1.6</source>
+                        <target>1.6</target>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>graniteds-debug</id>
+            <build>
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-dependency-plugin</artifactId>
+                            <executions>
+                                <execution>
+                                    <id>copy-bundles</id>
+                                    <phase>install</phase>
+                                    <goals>
+                                        <goal>copy</goal>
+                                    </goals>
+                                    <configuration>
+                                        <artifactItems>
+                                            <artifactItem>
+                                                <groupId>${project.groupId}</groupId>
+                                                <artifactId>${project.artifactId}</artifactId>
+                                                <version>${project.version}</version>
+                                                <type>${project.packaging}</type>
+                                            </artifactItem>
+                                        </artifactItems>
+                                        <outputDirectory>${felix.graniteds}/load
+                                        </outputDirectory>
+                                        <overWriteReleases>true</overWriteReleases>
+                                        <overWriteSnapshots>true</overWriteSnapshots>
+                                    </configuration>
+                                </execution>
+                            </executions>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+            </build>
+        </profile>
+    </profiles>
+</project>

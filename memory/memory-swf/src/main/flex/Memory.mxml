@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  The ASF licenses this file to You
+ * under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.  For additional information regarding
+ * copyright in this work, please see the NOTICE file in the top level
+ * directory of this distribution.
+ *
+-->
+<mx:Module xmlns:fx="http://ns.adobe.com/mxml/2009"
+           xmlns:s="library://ns.adobe.com/flex/spark"
+           xmlns:mx="library://ns.adobe.com/flex/mx"
+           width="100%" height="100%"
+           implements="com.zenika.systemmanager.api.ModuleInterface"
+           creationComplete="start()" xmlns:local="*">
+    <fx:Script>
+		<![CDATA[
+        import mx.messaging.ChannelSet;
+        import mx.messaging.channels.AMFChannel;
+        import mx.rpc.events.ResultEvent;
+
+        [Bindable]
+        private var memoryUsedList:ArrayCollection = new ArrayCollection();
+
+        private const MAX_CHAR_VALUES:int = 20;
+
+        private var memoryTimer:Timer;
+
+        private function getMemoryUsageResult(event:ResultEvent):void {
+            var memoryUsed:Number = (event.result as Number) / 1000000;
+            if (memoryUsedList.length > MAX_CHAR_VALUES) {
+                memoryUsedList.source.shift();
+            }
+            memoryUsedList.addItem({Memory: memoryUsed, Date: dateFormatter.format(new Date())});
+        }
+
+        private function onFault(event:Event):void {
+            stop();
+        }
+
+        public function start():void {
+            memoryTimer = new Timer(Number(memoryPollingIntervalComboBox.selectedItem) * 1000);
+            memoryTimer.addEventListener(TimerEvent.TIMER, memoryTimerHandler);
+            memoryTimer.start();
+
+            var channelSet:ChannelSet = new ChannelSet();
+            var channel:AMFChannel = new AMFChannel("SystemManagerChannel", "/WebContent/graniteamf/amf");
+            channelSet.addChannel(channel);
+            memoryService.channelSet = channelSet;
+
+            memoryService.getMemoryUsage();
+        }
+
+        public function stop():void {
+            memoryTimer.stop();
+        }
+
+        private function memoryTimerHandler(event:TimerEvent):void {
+            memoryTimer.delay = Number(memoryPollingIntervalComboBox.selectedItem) * 1000;
+            memoryService.getMemoryUsage();
+        }
+        ]]>
+	</fx:Script>
+
+    <fx:Declarations>
+        <s:RemoteObject id="memoryService"
+                        destination="com.zenika.systemmanager.memory.service.MemoryService">
+            <mx:method name="getMemoryUsage"
+                       result="getMemoryUsageResult(event)"
+                       fault="onFault(event)"/>
+        </s:RemoteObject>
+
+        <mx:DateFormatter id="dateFormatter" formatString="J:NN:SS"/>
+    </fx:Declarations>
+
+    <s:VGroup width="100%" height="100%">
+        <s:HGroup width="100%" verticalAlign="middle">
+            <mx:Form>
+                <mx:FormItem label="Polling Interval :">
+                    <mx:ComboBox id="memoryPollingIntervalComboBox"
+                                 width="50"
+                                 selectedIndex="2">
+                        <mx:dataProvider>
+                            <mx:ArrayCollection>
+                                <fx:Number>1</fx:Number>
+                                <fx:Number>2</fx:Number>
+                                <fx:Number>5</fx:Number>
+                                <fx:Number>10</fx:Number>
+                                <fx:Number>25</fx:Number>
+                            </mx:ArrayCollection>
+                        </mx:dataProvider>
+                    </mx:ComboBox>
+                </mx:FormItem>
+            </mx:Form>
+            <mx:Spacer width="100%"/>
+            <mx:Legend dataProvider="{memoryChart}"/>
+        </s:HGroup>
+
+        <mx:LineChart id="memoryChart"
+                      dataProvider="{memoryUsedList}"
+                      width="100%"
+                      height="100%"
+                      showDataTips="true">
+
+            <!-- vertical axis -->
+            <mx:verticalAxis>
+                <mx:LinearAxis baseAtZero="false" title="Memory Usage (Mo)"/>
+            </mx:verticalAxis>
+
+            <!-- horizontal axis -->
+            <mx:horizontalAxis>
+                <mx:CategoryAxis categoryField="Date" title="Date"/>
+            </mx:horizontalAxis>
+
+            <mx:series>
+                <mx:LineSeries yField="Memory" form="curve" displayName="Memory">
+                    <mx:lineStroke>
+                        <s:Stroke color="haloOrange" weight="2" alpha="0.8"/>
+                    </mx:lineStroke>
+                </mx:LineSeries>
+            </mx:series>
+
+        </mx:LineChart>
+    </s:VGroup>
+
+</mx:Module>
+

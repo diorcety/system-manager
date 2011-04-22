@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  The ASF licenses this file to You
+ * under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.  For additional information regarding
+ * copyright in this work, please see the NOTICE file in the top level
+ * directory of this distribution.
+ *
+-->
+<mx:Module xmlns:fx="http://ns.adobe.com/mxml/2009"
+           xmlns:s="library://ns.adobe.com/flex/spark"
+           xmlns:mx="library://ns.adobe.com/flex/mx"
+           width="100%" height="100%"
+           implements="com.zenika.systemmanager.api.ModuleInterface"
+           creationComplete="start()" xmlns:local="*">
+    <fx:Script>
+		<![CDATA[
+        import com.zenika.systemmanager.test.service.TestClass;
+
+        import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
+        import mx.messaging.ChannelSet;
+        import mx.messaging.channels.AMFChannel;
+        import mx.rpc.events.ResultEvent;
+
+        private function ret(event:ResultEvent):void {
+            var ret = event.result as String;
+            Alert.show(ret);
+        }
+
+        private function send():void {
+
+            var array:ArrayCollection = new ArrayCollection();
+            var i:Number;
+            for (i = 1; i < 10; i++) {
+                var testClass:TestClass = new TestClass();
+                var j:Number;
+                for (j = 0; j < 4; j++) {
+                    var str:String = new String();
+                    str = j.toString() + " " + i.toString();
+                    testClass.add(str);
+                }
+                array.addItem(testClass);
+            }
+
+
+            testBisService.getOperation('setObject').send(array);
+
+        }
+
+        private function onFault(event:Event):void {
+            // Do nothing
+        }
+
+        public function start():void {
+            var channelSet:ChannelSet = new ChannelSet();
+            var channel:AMFChannel = new AMFChannel("SystemManagerChannel", "/WebContent/graniteamf/amf");
+            channelSet.addChannel(channel);
+            testBisService.channelSet = channelSet;
+        }
+
+        public function stop():void {
+            // Do nothing
+        }
+        ]]>
+	</fx:Script>
+
+    <fx:Declarations>
+        <s:RemoteObject id="testBisService"
+                        destination="com.zenika.systemmanager.test.service.TestService">
+            <mx:method name="setObject"
+                       result="ret(event)"
+                       fault="onFault(event)">
+            </mx:method>
+        </s:RemoteObject>
+    </fx:Declarations>
+
+    <s:VGroup width="100%" height="100%">
+        <mx:Form>
+            <mx:FormItem label="Send :">
+                <mx:Button id="sendsend" label="Send" click="send();"/>
+            </mx:FormItem>
+        </mx:Form>
+    </s:VGroup>
+
+</mx:Module>
+

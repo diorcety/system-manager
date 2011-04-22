@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  The ASF licenses this file to You
+ * under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.  For additional information regarding
+ * copyright in this work, please see the NOTICE file in the top level
+ * directory of this distribution.
+ *
+-->
+<mx:Module xmlns:fx="http://ns.adobe.com/mxml/2009"
+           xmlns:s="library://ns.adobe.com/flex/spark"
+           xmlns:mx="library://ns.adobe.com/flex/mx"
+           width="100%" height="100%"
+           implements="com.zenika.systemmanager.api.ModuleInterface"
+           creationComplete="start()" xmlns:local="*">
+    <fx:Script>
+		<![CDATA[
+        import mx.messaging.ChannelSet;
+        import mx.messaging.channels.AMFChannel;
+        import mx.rpc.events.ResultEvent;
+
+        [Bindable]
+        private var valueApplication:int;
+        [Bindable]
+        private var valueSession:int;
+        [Bindable]
+        private var valueRequest:int;
+
+        private function getValueRequest(event:ResultEvent):void {
+            valueRequest = event.result as int;
+        }
+
+        private function getValueSession(event:ResultEvent):void {
+            valueSession = event.result as int;
+        }
+
+        private function getValueApplication(event:ResultEvent):void {
+            valueApplication = event.result as int;
+        }
+
+        private function onFault(event:Event):void {
+            // Do nothing
+        }
+
+        public function start():void {
+            var channelSet:ChannelSet = new ChannelSet();
+            var channel:AMFChannel = new AMFChannel("SystemManagerChannel", "/WebContent/graniteamf/amf");
+            channelSet.addChannel(channel);
+            testServiceSession.channelSet = channelSet;
+            testServiceApplication.channelSet = channelSet;
+            testServiceRequest.channelSet = channelSet;
+        }
+
+        public function stop():void {
+            // Do nothing
+        }
+        ]]>
+	</fx:Script>
+
+    <fx:Declarations>
+        <s:RemoteObject id="testServiceSession"
+                        destination="com.zenika.systemmanager.test.service.ScopeServiceSession">
+            <mx:method name="getValue"
+                       result="getValueSession(event)"
+                       fault="onFault(event)"/>
+        </s:RemoteObject>
+        <s:RemoteObject id="testServiceRequest"
+                        destination="com.zenika.systemmanager.test.service.ScopeServiceRequest">
+            <mx:method name="getValue"
+                       result="getValueRequest(event)"
+                       fault="onFault(event)"/>
+        </s:RemoteObject>
+        <s:RemoteObject id="testServiceApplication"
+                        destination="com.zenika.systemmanager.test.service.ScopeServiceApplication">
+            <mx:method name="getValue"
+                       result="getValueApplication(event)"
+                       fault="onFault(event)"/>
+        </s:RemoteObject>
+    </fx:Declarations>
+
+    <s:VGroup width="100%" height="100%">
+        <mx:Form>
+            <mx:FormItem label="Session :">
+                <s:Label text="{valueSession}"/>
+                <mx:Button id="checksession" label="Check" click="testServiceSession.getValue();"/>
+            </mx:FormItem>
+            <mx:FormItem label="Request :">
+                <s:Label text="{valueRequest}"/>
+                <mx:Button id="checkrequest" label="Check" click="testServiceRequest.getValue();"/>
+            </mx:FormItem>
+            <mx:FormItem label="Application :">
+                <s:Label text="{valueApplication}"/>
+                <mx:Button id="checkapplication" label="Check" click="testServiceApplication.getValue();"/>
+            </mx:FormItem>
+        </mx:Form>
+    </s:VGroup>
+
+</mx:Module>
+

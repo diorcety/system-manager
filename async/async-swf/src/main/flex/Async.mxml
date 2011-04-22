@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  The ASF licenses this file to You
+ * under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.  For additional information regarding
+ * copyright in this work, please see the NOTICE file in the top level
+ * directory of this distribution.
+ *
+-->
+<mx:Module xmlns:fx="http://ns.adobe.com/mxml/2009"
+           xmlns:s="library://ns.adobe.com/flex/spark"
+           xmlns:mx="library://ns.adobe.com/flex/mx"
+           width="100%" height="100%"
+           implements="com.zenika.systemmanager.api.ModuleInterface"
+           creationComplete="start()" xmlns:local="*">
+    <fx:Script>
+		<![CDATA[
+        import com.zenika.systemmanager.async.service.ChatEntry;
+
+        import mx.controls.Alert;
+        import mx.messaging.ChannelSet;
+        import mx.messaging.events.MessageEvent;
+        import mx.messaging.messages.AsyncMessage;
+
+        import org.granite.gravity.Consumer;
+        import org.granite.gravity.Producer;
+        import org.granite.gravity.channels.GravityChannel;
+
+        private var consumer:Consumer = null;
+        private var producer:Producer = null;
+
+        public function start():void {
+            var channelSet:ChannelSet = new ChannelSet();
+            var channel:GravityChannel = new GravityChannel("SystemManagerGravityChannel", "/WebContent/graniteamf/gravity");
+            channelSet.addChannel(channel);
+
+            consumer = new Consumer();
+            consumer.channelSet = channelSet;
+            consumer.destination = "SystemManagerEvents";
+            consumer.topic = "/discussion";
+            consumer.subscribe();
+            consumer.addEventListener(MessageEvent.MESSAGE, messageHandler);
+
+            producer = new Producer();
+            producer.channelSet = channelSet;
+            producer.destination = "SystemManagerEvents";
+            producer.topic = "/discussion";
+        }
+
+        public function stop():void {
+            consumer.unsubscribe();
+            consumer.disconnect();
+            consumer = null;
+
+            producer.disconnect();
+            producer = null;
+        }
+
+        private function messageHandler(event:MessageEvent):void {
+            var msg:AsyncMessage = event.message as AsyncMessage;
+            var entry:ChatEntry = msg.body as ChatEntry;
+            Alert.show(entry.message, entry.pseudo);
+        }
+
+        private function send():void {
+            var msg:AsyncMessage = new AsyncMessage();
+            var ce:ChatEntry = new ChatEntry();
+            ce.message = message.text;
+            ce.pseudo = pseudo.text;
+            msg.body = ce;
+            producer.send(msg);
+        }
+        ]]>
+	</fx:Script>
+
+
+    <s:VGroup width="100%" height="100%">
+        <mx:Form>
+            <mx:FormItem label="Pseudo :">
+                <s:TextInput id="pseudo"/>
+            </mx:FormItem>
+            <mx:FormItem label="Message :">
+                <s:TextInput id="message"/>
+            </mx:FormItem>
+            <mx:Button id="checkrequest" label="Send" click="send();"/>
+        </mx:Form>
+    </s:VGroup>
+
+</mx:Module>
+

@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  The ASF licenses this file to You
+ * under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.  For additional information regarding
+ * copyright in this work, please see the NOTICE file in the top level
+ * directory of this distribution.
+ *
+-->
+<mx:Module xmlns:fx="http://ns.adobe.com/mxml/2009"
+           xmlns:s="library://ns.adobe.com/flex/spark"
+           xmlns:mx="library://ns.adobe.com/flex/mx"
+           width="100%" height="100%"
+           implements="com.zenika.systemmanager.api.ModuleInterface"
+           creationComplete="start()">
+
+    <fx:Script>
+		<![CDATA[
+        import mx.messaging.ChannelSet;
+        import mx.messaging.channels.AMFChannel;
+        import mx.rpc.events.ResultEvent;
+
+        [Bindable]
+        private var cpuUsedList:ArrayCollection = new ArrayCollection();
+
+        private const MAX_CHAR_VALUES:int = 20;
+
+        private var cpuTimer:Timer;
+
+        private function getCpuUsageResult(event:ResultEvent):void {
+            var cpuUsed:Number = event.result as Number;
+            if (cpuUsedList.length > MAX_CHAR_VALUES) {
+                cpuUsedList.source.shift();
+            }
+            cpuUsedList.addItem({CPU: cpuUsed, Date: dateFormatter.format(new Date())});
+        }
+
+        private function onFault(event:Event):void {
+            stop();
+        }
+
+        public function start():void {
+            cpuTimer = new Timer(Number(cpuPollingIntervalComboBox.selectedItem) * 1000);
+            cpuTimer.addEventListener(TimerEvent.TIMER, cpuTimerHandler);
+            cpuTimer.start();
+
+            var channelSet:ChannelSet = new ChannelSet();
+            var channel:AMFChannel = new AMFChannel("SystemManagerChannel", "/WebContent/graniteamf/amf");
+            channelSet.addChannel(channel);
+            cpuService.channelSet = channelSet;
+
+            cpuService.getCpuUsage();
+        }
+
+        public function stop():void {
+            cpuTimer.stop();
+        }
+
+        private function cpuTimerHandler(event:TimerEvent):void {
+            cpuTimer.delay = Number(cpuPollingIntervalComboBox.selectedItem) * 1000;
+            cpuService.getCpuUsage();
+        }
+        ]]>
+	</fx:Script>
+
+    <fx:Declarations>
+        <s:RemoteObject id="cpuService"
+                        destination="com.zenika.systemmanager.cpu.service.CpuService">
+            <mx:method name="getCpuUsage"
+                       result="getCpuUsageResult(event)"
+                       fault="onFault(event)"/>
+        </s:RemoteObject>
+
+        <mx:DateFormatter id="dateFormatter" formatString="J:NN:SS"/>
+    </fx:Declarations>
+
+    <s:VGroup width="100%" height="100%">
+        <s:HGroup width="100%" verticalAlign="middle">
+            <mx:Form>
+                <mx:FormItem label="Polling Interval :">
+                    <mx:ComboBox id="cpuPollingIntervalComboBox"
+                                 width="50"
+                                 selectedIndex="2">
+                        <mx:dataProvider>
+                            <mx:ArrayCollection>
+                                <fx:Number>1</fx:Number>
+                                <fx:Number>2</fx:Number>
+                                <fx:Number>5</fx:Number>
+                                <fx:Number>10</fx:Number>
+                                <fx:Number>25</fx:Number>
+                            </mx:ArrayCollection>
+                        </mx:dataProvider>
+                    </mx:ComboBox>
+                </mx:FormItem>
+            </mx:Form>
+            <mx:Spacer width="100%"/>
+            <mx:Legend dataProvider="{cpuChart}"/>
+        </s:HGroup>
+
+        <mx:LineChart id="cpuChart"
+                      dataProvider="{cpuUsedList}"
+                      width="100%"
+                      height="100%"
+                      showDataTips="true">
+
+            <!-- vertical axis -->
+            <mx:verticalAxis>
+                <mx:LinearAxis baseAtZero="false" title="CPU Usage (%)"/>
+            </mx:verticalAxis>
+
+            <!-- horizontal axis -->
+            <mx:horizontalAxis>
+                <mx:CategoryAxis categoryField="Date" title="Date"/>
+            </mx:horizontalAxis>
+
+            <mx:series>
+                <mx:LineSeries yField="CPU" form="curve" displayName="CPU">
+                    <mx:lineStroke>
+                        <s:Stroke color="haloGreen" weight="2" alpha="0.8"/>
+                    </mx:lineStroke>
+                </mx:LineSeries>
+            </mx:series>
+
+        </mx:LineChart>
+
+    </s:VGroup>
+
+</mx:Module>
+

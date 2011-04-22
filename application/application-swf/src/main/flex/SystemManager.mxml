@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  The ASF licenses this file to You
+ * under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.  For additional information regarding
+ * copyright in this work, please see the NOTICE file in the top level
+ * directory of this distribution.
+ *
+-->
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009"
+               xmlns:s="library://ns.adobe.com/flex/spark"
+               xmlns:mx="library://ns.adobe.com/flex/mx"
+               width="1100" height="100%"
+               pageTitle="System Manager (by Zenika)"
+               applicationComplete="start()">
+
+    <fx:Script>
+        <![CDATA[
+        import com.zenika.systemmanager.application.service.SWFModule;
+
+        import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
+        import mx.events.ModuleEvent;
+        import mx.managers.DragManager;
+        import mx.managers.PopUpManager;
+        import mx.messaging.ChannelSet;
+        import mx.messaging.channels.AMFChannel;
+        import mx.messaging.events.ChannelFaultEvent;
+        import mx.messaging.events.MessageEvent;
+        import mx.rpc.events.ResultEvent;
+
+        import org.granite.gravity.Consumer;
+        import org.granite.gravity.channels.GravityChannel;
+
+        /* Create dummy variables. */
+        private var dragManager:DragManager;
+        private var popUpManager:PopUpManager;
+
+        private var consumer:Consumer = null;
+
+        private var registeredSWFModules:Dictionary = new Dictionary();
+
+        private function start():void {
+            {
+                var channelSet:ChannelSet = new ChannelSet();
+                var channel:GravityChannel = new GravityChannel("SystemManagerGravityChannel", "/WebContent/graniteamf/gravity");
+                channelSet.addChannel(channel);
+
+                consumer = new Consumer();
+                consumer.channelSet = channelSet;
+                consumer.destination = "SystemManagerEvents";
+                consumer.topic = "/events";
+                consumer.addEventListener(ChannelFaultEvent.FAULT, onFault);
+                consumer.addEventListener(MessageEvent.MESSAGE, onConsumerMessage);
+                consumer.subscribe();
+            }
+            {
+                var channelSet2:ChannelSet = new ChannelSet();
+                var channel2:AMFChannel = new AMFChannel("SystemManagerChannel", "/WebContent/graniteamf/amf");
+                channelSet2.addChannel(channel2);
+
+                swfModulesService.channelSet = channelSet2;
+            }
+            swfModulesService.getModules();
+        }
+
+        private function errorHandler(event:ModuleEvent):void {
+            Alert.show(event.toString());
+        }
+
+        private function loadModule(swfModule:SWFModule):void {
+            var systemModulePanel:SystemModulePanel = new SystemModulePanel();
+            systemModulePanel.title = swfModule.name;
+            systemModulePanel.url = swfModule.getModulePath();
+            systemModulePanel.alpha = 0.0;
+            systemTileGroup.addElement(systemModulePanel);
+            registeredSWFModules[swfModule.name] = systemModulePanel;
+        }
+
+        private function getModulesResult(event:ResultEvent):void {
+            var swfModules:ArrayCollection = event.result as ArrayCollection;
+            for each(var swfModule:SWFModule in swfModules) {
+                loadModule(swfModule);
+            }
+        }
+
+        private function onFault(event:Event):void {
+            Alert.show(event.toString());
+        }
+
+        private function onConsumerMessage(event:MessageEvent):void {
+            var swfModule:SWFModule = event.message.body as SWFModule;
+            if (swfModule) {
+                if (swfModule.eventType == SWFModule.LOAD) {
+                    loadModule(swfModule);
+                } else {
+                    var systemModulePanel:SystemModulePanel = registeredSWFModules[swfModule.name] as SystemModulePanel;
+                    systemModulePanel.unload();
+                }
+            }
+        }
+        ]]>
+    </fx:Script>
+
+    <fx:Declarations>
+        <fx:Component className="SystemModulePanel">
+            <s:Panel>
+
+                <s:addedEffect>
+                    <s:Fade alphaFrom="0.0" alphaTo="1.0" duration="1000"/>
+                </s:addedEffect>
+                <s:removedEffect>
+                    <s:Fade alphaFrom="1.0" alphaTo="0.0" duration="1000"/>
+                </s:removedEffect>
+
+                <fx:Script>
+                    <![CDATA[
+                    import com.zenika.systemmanager.api.ModuleInterface;
+
+                    import spark.components.TileGroup;
+
+                    [Bindable]
+                    public var url:String;
+
+                    /**
+                     * Unload module.
+                     */
+                    public function unload():void {
+                        (moduleLoader.child as ModuleInterface).stop();
+                        moduleLoader.unloadModule();
+                    }
+                    ]]>
+                </fx:Script>
+
+                <mx:ModuleLoader id="moduleLoader" url="{url}" applicationDomain="{ApplicationDomain.currentDomain}"
+                                 width="100%" height="100%">
+                    <mx:unload>
+                            if (parent != null) {
+                                (parent as TileGroup).removeElement(this);
+                            }
+                    </mx:unload>
+                </mx:ModuleLoader>
+            </s:Panel>
+        </fx:Component>
+
+        <s:RemoteObject id="swfModulesService"
+                        destination="com.zenika.systemmanager.application.service.SWFModulesService">
+            <s:method name="getModules"
+                      result="getModulesResult(event)"
+                      fault="onFault(event)"/>
+        </s:RemoteObject>
+
+    </fx:Declarations>
+
+    <s:VGroup width="100%" height="100%">
+
+        <s:HGroup width="100%" verticalAlign="bottom">
+            <s:BitmapImage source="@Embed('/../assets/images/zenika_logo.gif')"/>
+            <s:HGroup width="100%" verticalAlign="bottom" paddingLeft="10">
+                <s:BitmapImage source="@Embed('/../assets/images/bull_logo.png')"/>
+            </s:HGroup>
+            <s:HGroup width="100%" horizontalAlign="right">
+                <s:Label text="OSGi System Manager"
+                         fontSize="25"
+                         color="#4C4C4C"
+                         paddingBottom="2"/>
+            </s:HGroup>
+        </s:HGroup>
+
+        <s:Line width="100%">
+            <!-- Define the border color of the line. -->
+            <s:stroke>
+                <s:SolidColorStroke color="#942723" weight="1"/>
+            </s:stroke>
+        </s:Line>
+
+        <s:Scroller width="100%" height="100%">
+            <s:TileGroup id="systemTileGroup"
+                         width="100%"
+                         height="100%"
+                         columnWidth="480">
+
+            </s:TileGroup>
+        </s:Scroller>
+    </s:VGroup>
+
+</s:Application>
