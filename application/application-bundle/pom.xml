@@ -96,7 +96,6 @@
                     <instructions>
                         <Include-Resource>
                             <![CDATA[
-                src/main/resources,
                 ${project.build.directory}/dependency
               ]]>
                         </Include-Resource>
