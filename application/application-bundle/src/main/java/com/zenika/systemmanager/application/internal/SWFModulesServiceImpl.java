@@ -125,7 +125,7 @@ public class SWFModulesServiceImpl implements SWFModulesService, GraniteDestinat
             destination = destinationFactory.createComponentInstance(properties);
         }
 
-        gcr.registerClass(Constants.GRAVITY_DESTINATION, SWFModule.class);
+        gcr.registerClass(Constants.GRAVITY_DESTINATION, SWFModule.class, false);
 
         bundleTracker = new BundleTracker(bundleContext, Bundle.ACTIVE, null) {
             public Object addingBundle(Bundle bundle, BundleEvent event) {

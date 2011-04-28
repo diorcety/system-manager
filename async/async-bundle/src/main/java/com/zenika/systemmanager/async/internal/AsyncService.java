@@ -81,14 +81,14 @@ public class AsyncService {
     void start() {
 
         thread = new TheadPublisher(publisher);
-        gcr.registerClass(Constants.GRAVITY_DESTINATION, ChatEntry.class);
+        gcr.registerClass(Constants.GRAVITY_DESTINATION, ChatEntry.class, false);
         thread.start();
     }
 
     @Invalidate
     void stop() {
         try {
-            gcr.unregisterClass("events", ChatEntry.class);
+            gcr.unregisterClass("events", ChatEntry.class, false);
             thread.stop();
         } catch (Exception e) {
         }
