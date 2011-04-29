@@ -35,6 +35,7 @@ import org.apache.felix.ipojo.annotations.Provides;
 import org.apache.felix.ipojo.annotations.Requires;
 import org.apache.felix.ipojo.annotations.Validate;
 
+import org.granite.osgi.GraniteClassRegistry;
 import org.granite.osgi.service.GraniteDestination;
 
 import java.util.Collection;
@@ -51,8 +52,13 @@ public class Test2ServiceImpl implements Test2Service, GraniteDestination {
     @Requires(from = "org.granite.config.flex.Destination")
     Factory destinationFactory;
 
+    @Requires
+    GraniteClassRegistry gcr;
+
     @Validate
     void start() throws MissingHandlerException, ConfigurationException, UnacceptableConfiguration {
+        gcr.registerClass(getId(), new Class[]{TestClass.class});
+
         {
             Collection<String> channels = new LinkedList<String>();
             channels.add(Constants.GRANITE_CHANNEL);
@@ -67,6 +73,8 @@ public class Test2ServiceImpl implements Test2Service, GraniteDestination {
     @Invalidate
     public void stop() {
         destination.dispose();
+
+        gcr.unregisterClass(getId());
     }
 
     @Override

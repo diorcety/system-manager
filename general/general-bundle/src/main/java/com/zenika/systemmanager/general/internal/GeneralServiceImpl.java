@@ -35,6 +35,7 @@ import org.apache.felix.ipojo.annotations.Provides;
 import org.apache.felix.ipojo.annotations.Requires;
 import org.apache.felix.ipojo.annotations.Validate;
 
+import org.granite.osgi.GraniteClassRegistry;
 import org.granite.osgi.service.GraniteDestination;
 
 import java.lang.management.ManagementFactory;
@@ -57,10 +58,15 @@ public class GeneralServiceImpl implements GeneralService, GraniteDestination {
     @Requires(from = "org.granite.config.flex.Destination")
     Factory destinationFactory;
 
+    @Requires
+    GraniteClassRegistry gcr;
+
     ComponentInstance destination;
 
     @Validate
     void start() throws MissingHandlerException, ConfigurationException, UnacceptableConfiguration {
+        gcr.registerClass(getId(), new Class[]{GeneralInformation.class});
+
         {
             Collection<String> channels = new LinkedList<String>();
             channels.add(Constants.GRANITE_CHANNEL);
@@ -75,6 +81,8 @@ public class GeneralServiceImpl implements GeneralService, GraniteDestination {
     @Invalidate
     void stop() {
         destination.dispose();
+
+        gcr.unregisterClass(getId());
     }
 
     /* (non-Javadoc)

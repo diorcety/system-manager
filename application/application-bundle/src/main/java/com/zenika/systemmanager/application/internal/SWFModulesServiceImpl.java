@@ -71,7 +71,7 @@ public class SWFModulesServiceImpl implements SWFModulesService, GraniteDestinat
     @Requires
     GraniteClassRegistry gcr;
 
-    ComponentInstance destination;
+    ComponentInstance granite_destination, gravity_destination;
 
     @org.apache.felix.ipojo.handlers.event.Publisher(
             name = "AsyncPublisher",
@@ -101,6 +101,8 @@ public class SWFModulesServiceImpl implements SWFModulesService, GraniteDestinat
     private List<SWFModule> registeredSWFModules = new LinkedList<SWFModule>();
 
 
+    private final static String GRAVITY_DESTINATION = "SystemManagerApplication";
+
     /**
      * Constructor.
      *
@@ -115,6 +117,9 @@ public class SWFModulesServiceImpl implements SWFModulesService, GraniteDestinat
      */
     @Validate
     public void start() throws MissingHandlerException, ConfigurationException, UnacceptableConfiguration {
+        gcr.registerClass(GRAVITY_DESTINATION, new Class[]{SWFModule.class});
+        gcr.registerClass(getId(), new Class[]{SWFModule.class});
+
         {
             Collection<String> channels = new LinkedList<String>();
             channels.add(Constants.GRANITE_CHANNEL);
@@ -122,10 +127,17 @@ public class SWFModulesServiceImpl implements SWFModulesService, GraniteDestinat
             properties.put("ID", getId());
             properties.put("SERVICE", Constants.GRANITE_SERVICE);
             properties.put("CHANNELS", channels);
-            destination = destinationFactory.createComponentInstance(properties);
+            granite_destination = destinationFactory.createComponentInstance(properties);
         }
-
-        gcr.registerClass(Constants.GRAVITY_DESTINATION, SWFModule.class, false);
+        {
+            Collection<String> channels = new LinkedList<String>();
+            channels.add(Constants.GRAVITY_CHANNEL);
+            Dictionary properties = new Hashtable();
+            properties.put("ID", GRAVITY_DESTINATION);
+            properties.put("SERVICE", Constants.GRAVITY_SERVICE);
+            properties.put("CHANNELS", channels);
+            gravity_destination = destinationFactory.createComponentInstance(properties);
+        }
 
         bundleTracker = new BundleTracker(bundleContext, Bundle.ACTIVE, null) {
             public Object addingBundle(Bundle bundle, BundleEvent event) {
@@ -146,10 +158,13 @@ public class SWFModulesServiceImpl implements SWFModulesService, GraniteDestinat
 
     @Invalidate
     public void stop() {
-        destination.dispose();
+        granite_destination.dispose();
 
         // Stops tracking SWF Modules
         bundleTracker.close();
+
+        gcr.unregisterClass(GRAVITY_DESTINATION);
+        gcr.unregisterClass(getId());
     }
 
     /**
@@ -214,7 +229,7 @@ public class SWFModulesServiceImpl implements SWFModulesService, GraniteDestinat
                 // Post event
                 Dictionary<String, Object> prop = new Hashtable<String, Object>();
                 prop.put("message.topic", "/events");
-                prop.put("message.destination", Constants.GRAVITY_DESTINATION);
+                prop.put("message.destination", GRAVITY_DESTINATION);
                 prop.put("message.data", swfModule);
                 publisher.send(prop);
 
@@ -252,7 +267,7 @@ public class SWFModulesServiceImpl implements SWFModulesService, GraniteDestinat
         swfModule.setEventType(SWFModule.UNLOAD);
         Dictionary<String, Object> prop = new Hashtable<String, Object>();
         prop.put("message.topic", "/events");
-        prop.put("message.destination", Constants.GRAVITY_DESTINATION);
+        prop.put("message.destination", GRAVITY_DESTINATION);
         prop.put("message.data", swfModule);
         publisher.send(prop);
         registeredSWFModules.remove(swfModule);

@@ -22,6 +22,7 @@ package com.zenika.systemmanager.async.internal;
 
 import com.zenika.systemmanager.async.service.ChatEntry;
 
+import org.apache.felix.ipojo.*;
 import org.apache.felix.ipojo.annotations.Component;
 import org.apache.felix.ipojo.annotations.Instantiate;
 import org.apache.felix.ipojo.annotations.Invalidate;
@@ -32,12 +33,17 @@ import org.apache.felix.ipojo.handlers.event.publisher.Publisher;
 import org.granite.osgi.GraniteClassRegistry;
 import org.osgi.service.event.Event;
 
+import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.LinkedList;
 
 @Component
 @Instantiate
 public class AsyncService {
+
+    @Requires(from = "org.granite.config.flex.Destination")
+    Factory destinationFactory;
 
     @Requires
     GraniteClassRegistry gcr;
@@ -48,6 +54,10 @@ public class AsyncService {
     )
 
     private Publisher publisher;
+
+    ComponentInstance gravity_destination;
+
+    private final static String GRAVITY_DESTINATION = "SystemManagerAsync";
 
     class TheadPublisher extends Thread {
         Publisher publisher;
@@ -64,7 +74,7 @@ public class AsyncService {
                     Dictionary<String, Object> prop = new Hashtable<String, Object>();
                     ChatEntry ce = new ChatEntry("System", "Alive!");
                     prop.put("message.topic", "/discussion");
-                    prop.put("message.destination", Constants.GRAVITY_DESTINATION);
+                    prop.put("message.destination", GRAVITY_DESTINATION);
                     prop.put("message.data", ce);
                     publisher.send(prop);
                     sleep(20000);
@@ -78,20 +88,33 @@ public class AsyncService {
     TheadPublisher thread;
 
     @Validate
-    void start() {
+    void start() throws MissingHandlerException, ConfigurationException, UnacceptableConfiguration {
+        gcr.registerClass(GRAVITY_DESTINATION, new Class[]{ChatEntry.class});
+
+        {
+            Collection<String> channels = new LinkedList<String>();
+            channels.add(Constants.GRAVITY_CHANNEL);
+            Dictionary properties = new Hashtable();
+            properties.put("ID", GRAVITY_DESTINATION);
+            properties.put("SERVICE", Constants.GRAVITY_SERVICE);
+            properties.put("CHANNELS", channels);
+            gravity_destination = destinationFactory.createComponentInstance(properties);
+        }
 
         thread = new TheadPublisher(publisher);
-        gcr.registerClass(Constants.GRAVITY_DESTINATION, ChatEntry.class, false);
         thread.start();
     }
 
     @Invalidate
     void stop() {
         try {
-            gcr.unregisterClass("events", ChatEntry.class, false);
             thread.stop();
         } catch (Exception e) {
         }
+
+        gravity_destination.dispose();
+
+        gcr.unregisterClass(GRAVITY_DESTINATION);
     }
 
 

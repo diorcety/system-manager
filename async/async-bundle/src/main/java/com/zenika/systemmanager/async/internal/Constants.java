@@ -24,7 +24,6 @@ public class Constants {
     /**
      * Granite properties
      */
-    public final static String GRAVITY_DESTINATION = "SystemManagerEvents";
     public final static String GRAVITY_SERVICE = "SystemManagerGravity";
     public final static String GRAVITY_CHANNEL = "SystemManagerGravityChannel";
 }

@@ -47,14 +47,14 @@
 
             consumer = new Consumer();
             consumer.channelSet = channelSet;
-            consumer.destination = "SystemManagerEvents";
+            consumer.destination = "SystemManagerAsync";
             consumer.topic = "/discussion";
             consumer.subscribe();
             consumer.addEventListener(MessageEvent.MESSAGE, messageHandler);
 
             producer = new Producer();
             producer.channelSet = channelSet;
-            producer.destination = "SystemManagerEvents";
+            producer.destination = "SystemManagerAsync";
             producer.topic = "/discussion";
         }
 

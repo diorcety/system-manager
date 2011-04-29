@@ -56,7 +56,7 @@ public class Activator {
     Factory osgiAdapter;
 
     ComponentInstance granite_service, granite_channel;
-    ComponentInstance gravity_service, gravity_destination, gravity_service_adapter, gravity_adapter, gravity_channel;
+    ComponentInstance gravity_service, gravity_service_adapter, gravity_adapter, gravity_channel;
 
     @Validate
     void start() throws MissingHandlerException, ConfigurationException, UnacceptableConfiguration {
@@ -80,15 +80,6 @@ public class Activator {
             properties.put("CLASS", "org.granite.gravity.channels.GravityChannel");
             properties.put("ENDPOINT_URI", Constants.GRAVITY_CHANNEL_URI);
             gravity_channel = channelFactory.createComponentInstance(properties);
-        }
-        {
-            Collection<String> channels = new LinkedList<String>();
-            channels.add(Constants.GRAVITY_CHANNEL);
-            Dictionary properties = new Hashtable();
-            properties.put("ID", Constants.GRAVITY_DESTINATION);
-            properties.put("SERVICE", Constants.GRAVITY_SERVICE);
-            properties.put("CHANNELS", channels);
-            gravity_destination = destinationFactory.createComponentInstance(properties);
         }
         {
             Dictionary properties = new Hashtable();
@@ -120,7 +111,6 @@ public class Activator {
         granite_channel.dispose();
 
         gravity_channel.dispose();
-        gravity_destination.dispose();
         gravity_adapter.dispose();
         gravity_service.dispose();
         gravity_service_adapter.dispose();

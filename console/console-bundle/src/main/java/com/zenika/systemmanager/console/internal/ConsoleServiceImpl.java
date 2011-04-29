@@ -35,6 +35,7 @@ import org.apache.felix.ipojo.annotations.Provides;
 import org.apache.felix.ipojo.annotations.Requires;
 import org.apache.felix.ipojo.annotations.Validate;
 
+import org.granite.osgi.GraniteClassRegistry;
 import org.granite.osgi.service.GraniteDestination;
 
 import org.osgi.framework.Bundle;
@@ -58,6 +59,9 @@ public class ConsoleServiceImpl implements ConsoleService, GraniteDestination {
     @Requires(from = "org.granite.config.flex.Destination")
     Factory destinationFactory;
 
+    @Requires
+    GraniteClassRegistry gcr;
+
     ComponentInstance destination;
 
     /**
@@ -72,6 +76,8 @@ public class ConsoleServiceImpl implements ConsoleService, GraniteDestination {
 
     @Validate
     void start() throws MissingHandlerException, ConfigurationException, UnacceptableConfiguration {
+        gcr.registerClass(getId(), new Class[]{BundleInformation.class});
+
         {
             Collection<String> channels = new LinkedList<String>();
             channels.add(Constants.GRANITE_CHANNEL);
@@ -86,6 +92,8 @@ public class ConsoleServiceImpl implements ConsoleService, GraniteDestination {
     @Invalidate
     void stop() {
         destination.dispose();
+
+        gcr.unregisterClass(getId());
     }
 
     /* (non-Javadoc)

@@ -49,7 +49,6 @@ public class Constants {
     public final static String GRANITE_CHANNEL = "SystemManagerChannel";
     public final static String GRANITE_CHANNEL_URI = "/WebContent/graniteamf/amf";
 
-    public final static String GRAVITY_DESTINATION = "SystemManagerEvents";
     public final static String GRAVITY_SERVICE = "SystemManagerGravity";
     public final static String GRAVITY_CHANNEL = "SystemManagerGravityChannel";
     public final static String GRAVITY_CHANNEL_URI = "/WebContent/graniteamf/gravity";
