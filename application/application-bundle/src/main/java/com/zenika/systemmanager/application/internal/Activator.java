@@ -52,7 +52,7 @@ public class Activator {
     @Requires(from = "org.granite.config.flex.Adapter")
     Factory adapterFactory;
 
-    @Requires(from = "org.granite.gravity.osgi.OSGiEventAdminAdapter")
+    @Requires(from = "org.granite.gravity.osgi.adapters.EventAdmin")
     Factory osgiAdapter;
 
     ComponentInstance granite_service, granite_channel;
