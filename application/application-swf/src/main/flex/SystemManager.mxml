@@ -59,7 +59,7 @@
 
                 consumer = new Consumer();
                 consumer.channelSet = channelSet;
-                consumer.destination = "SystemManagerEvents";
+                consumer.destination = "SystemManagerApplication";
                 consumer.topic = "/events";
                 consumer.addEventListener(ChannelFaultEvent.FAULT, onFault);
                 consumer.addEventListener(MessageEvent.MESSAGE, onConsumerMessage);
