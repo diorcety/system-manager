@@ -121,21 +121,17 @@ public class SWFModulesServiceImpl implements SWFModulesService, GraniteDestinat
         gcr.registerClasses(getId(), new Class[]{SWFModule.class});
 
         {
-            Collection<String> channels = new LinkedList<String>();
-            channels.add(Constants.GRANITE_CHANNEL);
             Dictionary properties = new Hashtable();
             properties.put("ID", getId());
             properties.put("SERVICE", Constants.GRANITE_SERVICE);
-            properties.put("CHANNELS", channels);
+            properties.put("CHANNELS", new String[]{Constants.GRANITE_CHANNEL});
             granite_destination = destinationFactory.createComponentInstance(properties);
         }
         {
-            Collection<String> channels = new LinkedList<String>();
-            channels.add(Constants.GRAVITY_CHANNEL);
             Dictionary properties = new Hashtable();
             properties.put("ID", GRAVITY_DESTINATION);
             properties.put("SERVICE", Constants.GRAVITY_SERVICE);
-            properties.put("CHANNELS", channels);
+            properties.put("CHANNELS", new String[]{Constants.GRAVITY_CHANNEL});
             gravity_destination = destinationFactory.createComponentInstance(properties);
         }
 

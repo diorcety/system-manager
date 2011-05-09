@@ -61,34 +61,28 @@ public class ScopeServiceFactory implements GraniteFactory {
             factory = factoryFactory.createComponentInstance(properties);
         }
         {
-            Collection<String> channels = new LinkedList<String>();
-            channels.add(Constants.GRANITE_CHANNEL);
             Dictionary properties = new Hashtable();
             properties.put("ID", "com.zenika.systemmanager.test.service.ScopeServiceSession");
             properties.put("SERVICE", Constants.GRANITE_SERVICE);
-            properties.put("CHANNELS", channels);
+            properties.put("CHANNELS", new String[]{Constants.GRANITE_CHANNEL});
             properties.put("FACTORY", getId());
             properties.put("SCOPE", GraniteDestination.SCOPE.SESSION);
             destination1 = destinationFactory.createComponentInstance(properties);
         }
         {
-            Collection<String> channels = new LinkedList<String>();
-            channels.add(Constants.GRANITE_CHANNEL);
             Dictionary properties = new Hashtable();
             properties.put("ID", "com.zenika.systemmanager.test.service.ScopeServiceRequest");
             properties.put("SERVICE", Constants.GRANITE_SERVICE);
-            properties.put("CHANNELS", channels);
+            properties.put("CHANNELS", new String[]{Constants.GRANITE_CHANNEL});
             properties.put("FACTORY", getId());
             properties.put("SCOPE", GraniteDestination.SCOPE.REQUEST);
             destination2 = destinationFactory.createComponentInstance(properties);
         }
         {
-            Collection<String> channels = new LinkedList<String>();
-            channels.add(Constants.GRANITE_CHANNEL);
             Dictionary properties = new Hashtable();
             properties.put("ID", "com.zenika.systemmanager.test.service.ScopeServiceApplication");
             properties.put("SERVICE", Constants.GRANITE_SERVICE);
-            properties.put("CHANNELS", channels);
+            properties.put("CHANNELS", new String[]{Constants.GRANITE_CHANNEL});
             properties.put("FACTORY", getId());
             properties.put("SCOPE", GraniteDestination.SCOPE.APPLICATION);
             destination3 = destinationFactory.createComponentInstance(properties);

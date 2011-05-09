@@ -92,12 +92,10 @@ public class AsyncService {
         gcr.registerClasses(GRAVITY_DESTINATION, new Class[]{ChatEntry.class});
 
         {
-            Collection<String> channels = new LinkedList<String>();
-            channels.add(Constants.GRAVITY_CHANNEL);
             Dictionary properties = new Hashtable();
             properties.put("ID", GRAVITY_DESTINATION);
             properties.put("SERVICE", Constants.GRAVITY_SERVICE);
-            properties.put("CHANNELS", channels);
+            properties.put("CHANNELS", new String[]{Constants.GRAVITY_CHANNEL});
             gravity_destination = destinationFactory.createComponentInstance(properties);
         }
 

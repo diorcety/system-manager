@@ -70,12 +70,10 @@ public class CpuServiceImpl implements CpuService, GraniteDestination {
     @Validate
     void start() throws MissingHandlerException, ConfigurationException, UnacceptableConfiguration {
         {
-            Collection<String> channels = new LinkedList<String>();
-            channels.add(Constants.GRANITE_CHANNEL);
             Dictionary properties = new Hashtable();
             properties.put("ID", getId());
             properties.put("SERVICE", Constants.GRANITE_SERVICE);
-            properties.put("CHANNELS", channels);
+            properties.put("CHANNELS", new String[]{Constants.GRANITE_CHANNEL});
             destination = destinationFactory.createComponentInstance(properties);
         }
     }
