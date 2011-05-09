@@ -58,7 +58,7 @@ public class TestServiceImpl implements TestService, GraniteDestination {
 
     @Validate
     void start() throws MissingHandlerException, ConfigurationException, UnacceptableConfiguration {
-        gcr.registerClass(getId(), new Class[]{TestClass.class});
+        gcr.registerClasses(getId(), new Class[]{TestClass.class});
 
         {
             Collection<String> channels = new LinkedList<String>();
@@ -76,7 +76,7 @@ public class TestServiceImpl implements TestService, GraniteDestination {
     public void stop() {
         destination.dispose();
 
-        gcr.unregisterClass(getId());
+        gcr.unregisterClasses(getId());
     }
 
     @Override

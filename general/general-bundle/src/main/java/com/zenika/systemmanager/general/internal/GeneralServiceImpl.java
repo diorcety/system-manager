@@ -65,7 +65,7 @@ public class GeneralServiceImpl implements GeneralService, GraniteDestination {
 
     @Validate
     void start() throws MissingHandlerException, ConfigurationException, UnacceptableConfiguration {
-        gcr.registerClass(getId(), new Class[]{GeneralInformation.class});
+        gcr.registerClasses(getId(), new Class[]{GeneralInformation.class});
 
         {
             Collection<String> channels = new LinkedList<String>();
@@ -82,7 +82,7 @@ public class GeneralServiceImpl implements GeneralService, GraniteDestination {
     void stop() {
         destination.dispose();
 
-        gcr.unregisterClass(getId());
+        gcr.unregisterClasses(getId());
     }
 
     /* (non-Javadoc)

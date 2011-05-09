@@ -24,5 +24,5 @@ import java.io.Serializable;
 import java.util.List;
 
 public class TestClass implements Serializable {
-    public List<String> strs;
+    public String str;
 }

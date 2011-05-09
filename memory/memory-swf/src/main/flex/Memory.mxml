@@ -27,7 +27,7 @@
     <fx:Script>
 		<![CDATA[
         import mx.messaging.ChannelSet;
-        import mx.messaging.channels.AMFChannel;
+        import org.granite.channels.GraniteChannel;
         import mx.rpc.events.ResultEvent;
 
         [Bindable]
@@ -55,7 +55,7 @@
             memoryTimer.start();
 
             var channelSet:ChannelSet = new ChannelSet();
-            var channel:AMFChannel = new AMFChannel("SystemManagerChannel", "/WebContent/graniteamf/amf");
+            var channel:GraniteChannel = new GraniteChannel("SystemManagerChannel", "/WebContent/graniteamf/amf");
             channelSet.addChannel(channel);
             memoryService.channelSet = channelSet;
 

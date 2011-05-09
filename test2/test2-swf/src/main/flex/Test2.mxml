@@ -30,8 +30,10 @@
 
         import mx.controls.Alert;
         import mx.messaging.ChannelSet;
-        import mx.messaging.channels.AMFChannel;
+        import org.granite.channels.GraniteChannel;
         import mx.rpc.events.ResultEvent;
+
+        import org.granite.util.GraniteClassRegistry;
 
         private function ret(event:ResultEvent):void {
             var ret = event.result as String;
@@ -41,11 +43,7 @@
         private function send():void {
             var testClass:TestClass = new TestClass();
             var j:Number;
-            for (j = 0; j < 4; j++) {
-                var str:String = new String();
-                str = j.toString();
-                testClass.add(str);
-            }
+            testClass.str = "ABCD";
             testBisService.getOperation('setObject').send(testClass);
         }
 
@@ -54,13 +52,16 @@
         }
 
         public function start():void {
+            GraniteClassRegistry.registerClasses("com.zenika.systemmanager.test.service.Test2Service", [TestClass]);
+
             var channelSet:ChannelSet = new ChannelSet();
-            var channel:AMFChannel = new AMFChannel("SystemManagerChannel", "/WebContent/graniteamf/amf");
+            var channel:GraniteChannel = new GraniteChannel("SystemManagerChannel", "/WebContent/graniteamf/amf");
             channelSet.addChannel(channel);
             testBisService.channelSet = channelSet;
         }
 
         public function stop():void {
+            GraniteClassRegistry.unregisterClasses("com.zenika.systemmanager.test.service.Test2Service");
             // Do nothing
         }
         ]]>

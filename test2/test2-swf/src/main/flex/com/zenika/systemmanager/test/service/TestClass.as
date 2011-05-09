@@ -29,14 +29,9 @@ import mx.collections.ArrayCollection;
 [RemoteClass(alias="com.zenika.systemmanager.test.service.TestClass")]
 public class TestClass {
 
-    public var strs:ArrayCollection;
+    public var str: String;
 
     public function TestClass() {
-        strs = new ArrayCollection();
-    }
-
-    public function add(str:String):void {
-        strs.addItem(str);
     }
 }
 }

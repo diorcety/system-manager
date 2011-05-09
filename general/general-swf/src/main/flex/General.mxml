@@ -29,8 +29,10 @@
         import com.zenika.systemmanager.general.service.GeneralInformation;
 
         import mx.messaging.ChannelSet;
-        import mx.messaging.channels.AMFChannel;
+        import org.granite.channels.GraniteChannel;
         import mx.rpc.events.ResultEvent;
+
+        import org.granite.util.GraniteClassRegistry;
 
         [Bindable]
         private var generalInformation:GeneralInformation;
@@ -44,10 +46,10 @@
         }
 
         public function start():void {
-            registerClassAlias("com.zenika.systemmanager.general.service.GeneralInformation", GeneralInformation);
+            GraniteClassRegistry.registerClasses("com.zenika.systemmanager.general.service.GeneralService", [GeneralInformation]);
 
             var channelSet:ChannelSet = new ChannelSet();
-            var channel:AMFChannel = new AMFChannel("SystemManagerChannel", "/WebContent/graniteamf/amf");
+            var channel:GraniteChannel = new GraniteChannel("SystemManagerChannel", "/WebContent/graniteamf/amf");
             channelSet.addChannel(channel);
             generalService.channelSet = channelSet;
 
@@ -55,6 +57,7 @@
         }
 
         public function stop():void {
+            GraniteClassRegistry.unregisterClasses("com.zenika.systemmanager.general.service.GeneralService");
             // Do nothing
         }
         ]]>

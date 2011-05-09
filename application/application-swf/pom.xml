@@ -37,6 +37,12 @@
             <type>swc</type>
         </dependency>
         <dependency>
+            <groupId>com.demonsterdebugger</groupId>
+            <artifactId>demonsterdebugger</artifactId>
+            <version>1.0.0</version>
+            <type>swc</type>
+        </dependency>
+        <dependency>
             <groupId>org.graniteds</groupId>
             <artifactId>granite-swc</artifactId>
             <version>2.2.0.SP2</version>

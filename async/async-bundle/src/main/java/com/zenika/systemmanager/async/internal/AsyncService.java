@@ -89,7 +89,7 @@ public class AsyncService {
 
     @Validate
     void start() throws MissingHandlerException, ConfigurationException, UnacceptableConfiguration {
-        gcr.registerClass(GRAVITY_DESTINATION, new Class[]{ChatEntry.class});
+        gcr.registerClasses(GRAVITY_DESTINATION, new Class[]{ChatEntry.class});
 
         {
             Collection<String> channels = new LinkedList<String>();
@@ -114,7 +114,7 @@ public class AsyncService {
 
         gravity_destination.dispose();
 
-        gcr.unregisterClass(GRAVITY_DESTINATION);
+        gcr.unregisterClasses(GRAVITY_DESTINATION);
     }
 
 

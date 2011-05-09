@@ -57,7 +57,7 @@ public class Test2ServiceImpl implements Test2Service, GraniteDestination {
 
     @Validate
     void start() throws MissingHandlerException, ConfigurationException, UnacceptableConfiguration {
-        gcr.registerClass(getId(), new Class[]{TestClass.class});
+        gcr.registerClasses(getId(), new Class[]{TestClass.class});
 
         {
             Collection<String> channels = new LinkedList<String>();
@@ -74,16 +74,12 @@ public class Test2ServiceImpl implements Test2Service, GraniteDestination {
     public void stop() {
         destination.dispose();
 
-        gcr.unregisterClass(getId());
+        gcr.unregisterClasses(getId());
     }
 
     @Override
     public String setObject(TestClass cls) {
-        String ret = "";
-        for (String str : cls.strs) {
-            ret += str + " ";
-        }
-        ret += "\n";
+        String ret = cls.str;
         return ret;
     }
 

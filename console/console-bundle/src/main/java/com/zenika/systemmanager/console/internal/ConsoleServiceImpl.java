@@ -76,7 +76,7 @@ public class ConsoleServiceImpl implements ConsoleService, GraniteDestination {
 
     @Validate
     void start() throws MissingHandlerException, ConfigurationException, UnacceptableConfiguration {
-        gcr.registerClass(getId(), new Class[]{BundleInformation.class});
+        gcr.registerClasses(getId(), new Class[]{BundleInformation.class});
 
         {
             Collection<String> channels = new LinkedList<String>();
@@ -93,7 +93,7 @@ public class ConsoleServiceImpl implements ConsoleService, GraniteDestination {
     void stop() {
         destination.dispose();
 
-        gcr.unregisterClass(getId());
+        gcr.unregisterClasses(getId());
     }
 
     /* (non-Javadoc)

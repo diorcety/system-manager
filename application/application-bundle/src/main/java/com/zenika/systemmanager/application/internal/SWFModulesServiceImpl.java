@@ -117,8 +117,8 @@ public class SWFModulesServiceImpl implements SWFModulesService, GraniteDestinat
      */
     @Validate
     public void start() throws MissingHandlerException, ConfigurationException, UnacceptableConfiguration {
-        gcr.registerClass(GRAVITY_DESTINATION, new Class[]{SWFModule.class});
-        gcr.registerClass(getId(), new Class[]{SWFModule.class});
+        gcr.registerClasses(GRAVITY_DESTINATION, new Class[]{SWFModule.class});
+        gcr.registerClasses(getId(), new Class[]{SWFModule.class});
 
         {
             Collection<String> channels = new LinkedList<String>();
@@ -163,8 +163,8 @@ public class SWFModulesServiceImpl implements SWFModulesService, GraniteDestinat
         // Stops tracking SWF Modules
         bundleTracker.close();
 
-        gcr.unregisterClass(GRAVITY_DESTINATION);
-        gcr.unregisterClass(getId());
+        gcr.unregisterClasses(GRAVITY_DESTINATION);
+        gcr.unregisterClasses(getId());
     }
 
     /**

@@ -31,8 +31,10 @@
         import mx.collections.ArrayCollection;
         import mx.controls.Alert;
         import mx.messaging.ChannelSet;
-        import mx.messaging.channels.AMFChannel;
+        import org.granite.channels.GraniteChannel;
         import mx.rpc.events.ResultEvent;
+
+        import org.granite.util.GraniteClassRegistry;
 
         private function ret(event:ResultEvent):void {
             var ret = event.result as String;
@@ -64,13 +66,16 @@
         }
 
         public function start():void {
+            GraniteClassRegistry.registerClasses("com.zenika.systemmanager.test.service.TestService", [TestClass]);
+
             var channelSet:ChannelSet = new ChannelSet();
-            var channel:AMFChannel = new AMFChannel("SystemManagerChannel", "/WebContent/graniteamf/amf");
+            var channel:GraniteChannel = new GraniteChannel("SystemManagerChannel", "/WebContent/graniteamf/amf");
             channelSet.addChannel(channel);
             testBisService.channelSet = channelSet;
         }
 
         public function stop():void {
+            GraniteClassRegistry.unregisterClasses("com.zenika.systemmanager.test.service.TestService");
             // Do nothing
         }
         ]]>

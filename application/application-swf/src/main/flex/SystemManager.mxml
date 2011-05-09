@@ -21,10 +21,29 @@
 <s:Application xmlns:fx="http://ns.adobe.com/mxml/2009"
                xmlns:s="library://ns.adobe.com/flex/spark"
                xmlns:mx="library://ns.adobe.com/flex/mx"
+               xmlns:debugger="com.demonsters.debugger.*"
+               creationComplete="onCreationComplete()"
                width="1100" height="100%"
                pageTitle="System Manager (by Zenika)"
                applicationComplete="start()">
+      <fx:Script>
+        <![CDATA[
 
+            import mx.logging.ILogger;
+            import mx.logging.Log;
+
+            private function onCreationComplete():void {
+
+                // Monster Debugger trace message
+                monsterDebugger.trace(this, "Hello World!");
+
+                // Flex trace message
+                var logger:ILogger = Log.getLogger("SystemManager.mxml");
+                logger.error("Hello World!");
+            }
+        ]]>
+    </fx:Script>
+    <debugger:MonsterDebuggerFlex id="monsterDebugger"/>
     <fx:Script>
         <![CDATA[
         import com.zenika.systemmanager.application.service.SWFModule;
@@ -35,7 +54,7 @@
         import mx.managers.DragManager;
         import mx.managers.PopUpManager;
         import mx.messaging.ChannelSet;
-        import mx.messaging.channels.AMFChannel;
+        import org.granite.channels.GraniteChannel;
         import mx.messaging.events.ChannelFaultEvent;
         import mx.messaging.events.MessageEvent;
         import mx.rpc.events.ResultEvent;
@@ -67,7 +86,7 @@
             }
             {
                 var channelSet2:ChannelSet = new ChannelSet();
-                var channel2:AMFChannel = new AMFChannel("SystemManagerChannel", "/WebContent/graniteamf/amf");
+                var channel2:GraniteChannel = new GraniteChannel("SystemManagerChannel", "/WebContent/graniteamf/amf");
                 channelSet2.addChannel(channel2);
 
                 swfModulesService.channelSet = channelSet2;
@@ -143,8 +162,7 @@
                     ]]>
                 </fx:Script>
 
-                <mx:ModuleLoader id="moduleLoader" url="{url}" applicationDomain="{ApplicationDomain.currentDomain}"
-                                 width="100%" height="100%">
+                <mx:ModuleLoader id="moduleLoader" url="{url}" width="100%" height="100%">
                     <mx:unload>
                             if (parent != null) {
                                 (parent as TileGroup).removeElement(this);

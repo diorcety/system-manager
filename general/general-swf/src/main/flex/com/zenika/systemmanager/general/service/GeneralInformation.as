@@ -24,6 +24,7 @@ package com.zenika.systemmanager.general.service {
  * @author Francois Fornaciari
  */
 [Bindable]
+[RemoteClass(alias = "com.zenika.systemmanager.general.service.GeneralInformation")]
 public class GeneralInformation {
     /**
      * The number of processors available to the JVM.
