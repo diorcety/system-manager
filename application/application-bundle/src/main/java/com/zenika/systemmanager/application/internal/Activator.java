@@ -32,10 +32,11 @@ import org.apache.felix.ipojo.annotations.Invalidate;
 import org.apache.felix.ipojo.annotations.Requires;
 import org.apache.felix.ipojo.annotations.Validate;
 
-import java.util.Collection;
+import org.granite.gravity.osgi.adapters.ea.EAConstants;
+
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.LinkedList;
+
 
 @Component
 @Instantiate
@@ -46,17 +47,8 @@ public class Activator {
     @Requires(from = "org.granite.config.flex.Channel")
     Factory channelFactory;
 
-    @Requires(from = "org.granite.config.flex.Destination")
-    Factory destinationFactory;
-
-    @Requires(from = "org.granite.config.flex.Adapter")
-    Factory adapterFactory;
-
-    @Requires(from = "org.granite.gravity.osgi.adapters.EventAdmin")
-    Factory osgiAdapter;
-
     ComponentInstance granite_service, granite_channel;
-    ComponentInstance gravity_service, gravity_service_adapter, gravity_adapter, gravity_channel;
+    ComponentInstance gravity_service, gravity_channel;
 
     @Validate
     void start() throws MissingHandlerException, ConfigurationException, UnacceptableConfiguration {
@@ -64,14 +56,9 @@ public class Activator {
         // Gravity
         {
             Dictionary properties = new Hashtable();
-            properties.put("ID", "default_gravity");
-            gravity_adapter = adapterFactory.createComponentInstance(properties);
-        }
-        {
-            Dictionary properties = new Hashtable();
             properties.put("ID", Constants.GRAVITY_SERVICE);
             properties.put("MESSAGETYPES", "flex.messaging.messages.AsyncMessage");
-            properties.put("DEFAULT_ADAPTER", "default_gravity");
+            properties.put("DEFAULT_ADAPTER", EAConstants.ADAPTER_ID);
             gravity_service = serviceFactory.createComponentInstance(properties);
         }
         {
@@ -80,15 +67,6 @@ public class Activator {
             properties.put("CLASS", "org.granite.gravity.channels.GravityChannel");
             properties.put("ENDPOINT_URI", Constants.GRAVITY_CHANNEL_URI);
             gravity_channel = channelFactory.createComponentInstance(properties);
-        }
-        {
-            Dictionary properties = new Hashtable();
-            Dictionary prop = new Hashtable();
-            prop.put("GravitySubscriber", "systemmanager");
-            prop.put("GravityPublisher", "systemmanager");
-            properties.put("ID", "default_gravity");
-            properties.put("event.topics", prop);
-            gravity_service_adapter = osgiAdapter.createComponentInstance(properties);
         }
 
         // GraniteDS
@@ -111,8 +89,6 @@ public class Activator {
         granite_channel.dispose();
 
         gravity_channel.dispose();
-        gravity_adapter.dispose();
         gravity_service.dispose();
-        gravity_service_adapter.dispose();
     }
 }

@@ -49,7 +49,6 @@ import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.BundleTracker;
 
-import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.LinkedList;
@@ -68,14 +67,17 @@ public class SWFModulesServiceImpl implements SWFModulesService, GraniteDestinat
     @Requires(from = "org.granite.config.flex.Destination")
     Factory destinationFactory;
 
+    @Requires(from = "org.granite.gravity.osgi.adapters.ea.configuration")
+    Factory eaFactory;
+
     @Requires
     GraniteClassRegistry gcr;
 
-    ComponentInstance granite_destination, gravity_destination;
+    ComponentInstance granite_destination, gravity_destination, ea_config;
 
     @org.apache.felix.ipojo.handlers.event.Publisher(
             name = "AsyncPublisher",
-            topics = "systemmanager"
+            topics = "events"
     )
 
     private Publisher publisher;
@@ -119,7 +121,11 @@ public class SWFModulesServiceImpl implements SWFModulesService, GraniteDestinat
     public void start() throws MissingHandlerException, ConfigurationException, UnacceptableConfiguration {
         gcr.registerClasses(GRAVITY_DESTINATION, new Class[]{SWFModule.class});
         gcr.registerClasses(getId(), new Class[]{SWFModule.class});
-
+        {
+            Dictionary properties = new Hashtable();
+            properties.put("destination", GRAVITY_DESTINATION);
+            ea_config = eaFactory.createComponentInstance(properties);
+        }
         {
             Dictionary properties = new Hashtable();
             properties.put("ID", getId());
@@ -155,6 +161,8 @@ public class SWFModulesServiceImpl implements SWFModulesService, GraniteDestinat
     @Invalidate
     public void stop() {
         granite_destination.dispose();
+        gravity_destination.dispose();
+        ea_config.dispose();
 
         // Stops tracking SWF Modules
         bundleTracker.close();
@@ -223,11 +231,7 @@ public class SWFModulesServiceImpl implements SWFModulesService, GraniteDestinat
                 registerResources(bundle, swfModule.getAlias());
 
                 // Post event
-                Dictionary<String, Object> prop = new Hashtable<String, Object>();
-                prop.put("message.topic", "/events");
-                prop.put("message.destination", GRAVITY_DESTINATION);
-                prop.put("message.data", swfModule);
-                publisher.send(prop);
+                publisher.sendData(swfModule);
 
                 // Save registered SWF modules
                 registeredSWFModules.add(swfModule);
@@ -261,11 +265,7 @@ public class SWFModulesServiceImpl implements SWFModulesService, GraniteDestinat
     private void unregister(SWFModule swfModule) {
         System.out.println("Unregistering resources at context " + swfModule.getAlias());
         swfModule.setEventType(SWFModule.UNLOAD);
-        Dictionary<String, Object> prop = new Hashtable<String, Object>();
-        prop.put("message.topic", "/events");
-        prop.put("message.destination", GRAVITY_DESTINATION);
-        prop.put("message.data", swfModule);
-        publisher.send(prop);
+        publisher.sendData(swfModule);
         registeredSWFModules.remove(swfModule);
         httpService.unregister(swfModule.getAlias());
     }

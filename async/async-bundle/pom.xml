@@ -30,6 +30,12 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>org.graniteds-osgi</groupId>
+            <artifactId>granite-gravity-ea</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.ipojo.annotations</artifactId>
             <scope>provided</scope>
