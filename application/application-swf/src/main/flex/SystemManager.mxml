@@ -152,12 +152,12 @@
             </s:Panel>
         </fx:Component>
 
-        <s:RemoteObject id="swfModulesService"
+        <mx:RemoteObject id="swfModulesService"
                         destination="com.zenika.systemmanager.application.service.SWFModulesService">
-            <s:method name="getModules"
+            <mx:method name="getModules"
                       result="getModulesResult(event)"
                       fault="onFault(event)"/>
-        </s:RemoteObject>
+        </mx:RemoteObject>
 
     </fx:Declarations>
 
@@ -179,7 +179,7 @@
         <s:Line width="100%">
             <!-- Define the border color of the line. -->
             <s:stroke>
-                <s:SolidColorStroke color="#942723" weight="1"/>
+                <mx:SolidColorStroke color="#942723" weight="1"/>
             </s:stroke>
         </s:Line>
 

@@ -34,11 +34,35 @@
     </build>
 
     <dependencies>
+        <!-- flex sdk dependencies -->
         <dependency>
             <groupId>com.adobe.flex.framework</groupId>
-            <artifactId>flex-framework</artifactId>
+            <artifactId>flex</artifactId>
             <version>${flex.version}</version>
-            <type>pom</type>
+            <type>swc</type>
+            <scope>external</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.adobe.flex.framework</groupId>
+            <artifactId>framework</artifactId>
+            <version>${flex.version}</version>
+            <type>swc</type>
+            <scope>external</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.adobe.flex.framework</groupId>
+            <artifactId>rpc</artifactId>
+            <version>${flex.version}</version>
+            <type>swc</type>
+            <scope>external</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.adobe.flex.framework</groupId>
+            <artifactId>playerglobal</artifactId>
+            <version>${flex.version}</version>
+            <type>swc</type>
+            <classifier>${player.version}</classifier>
+            <scope>external</scope>
         </dependency>
     </dependencies>
 

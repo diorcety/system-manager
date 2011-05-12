@@ -52,6 +52,7 @@
                 <artifactId>flexmojos-maven-plugin</artifactId>
                 <configuration>
                     <sourceFile>SystemManager.mxml</sourceFile>
+                    <linkReport>true</linkReport>
                 </configuration>
             </plugin>
         </plugins>

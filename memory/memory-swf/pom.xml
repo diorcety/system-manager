@@ -38,16 +38,11 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.adobe.flex.framework</groupId>
-            <artifactId>flex-framework</artifactId>
-            <version>${flex.version}</version>
-            <type>pom</type>
-        </dependency>
-        <dependency>
             <groupId>com.zenika.systemmanager</groupId>
             <artifactId>application-swf</artifactId>
             <version>1.0.0-SNAPSHOT</version>
-            <type>swf</type>
+            <type>xml</type>
+            <classifier>link-report</classifier>
         </dependency>
     </dependencies>
 

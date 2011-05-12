@@ -22,6 +22,7 @@
     <properties>
         <!-- Flex -->
         <flex.version>4.0.0.14159</flex.version>
+        <player.version>10.0</player.version>
         <flexmojos.version>3.6.1</flexmojos.version>
 
         <!-- OSGi -->

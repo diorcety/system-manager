@@ -69,24 +69,24 @@
 	</fx:Script>
 
     <fx:Declarations>
-        <s:RemoteObject id="testServiceSession"
+        <mx:RemoteObject id="testServiceSession"
                         destination="com.zenika.systemmanager.test.service.ScopeServiceSession">
             <mx:method name="getValue"
                        result="getValueSession(event)"
                        fault="onFault(event)"/>
-        </s:RemoteObject>
-        <s:RemoteObject id="testServiceRequest"
+        </mx:RemoteObject>
+        <mx:RemoteObject id="testServiceRequest"
                         destination="com.zenika.systemmanager.test.service.ScopeServiceRequest">
             <mx:method name="getValue"
                        result="getValueRequest(event)"
                        fault="onFault(event)"/>
-        </s:RemoteObject>
-        <s:RemoteObject id="testServiceApplication"
+        </mx:RemoteObject>
+        <mx:RemoteObject id="testServiceApplication"
                         destination="com.zenika.systemmanager.test.service.ScopeServiceApplication">
             <mx:method name="getValue"
                        result="getValueApplication(event)"
                        fault="onFault(event)"/>
-        </s:RemoteObject>
+        </mx:RemoteObject>
     </fx:Declarations>
 
     <s:VGroup width="100%" height="100%">

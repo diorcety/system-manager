@@ -75,12 +75,12 @@
 	</fx:Script>
 
     <fx:Declarations>
-        <s:RemoteObject id="cpuService"
+        <mx:RemoteObject id="cpuService"
                         destination="com.zenika.systemmanager.cpu.service.CpuService">
             <mx:method name="getCpuUsage"
                        result="getCpuUsageResult(event)"
                        fault="onFault(event)"/>
-        </s:RemoteObject>
+        </mx:RemoteObject>
 
         <mx:DateFormatter id="dateFormatter" formatString="J:NN:SS"/>
     </fx:Declarations>

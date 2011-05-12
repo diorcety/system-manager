@@ -69,12 +69,12 @@
 	</fx:Script>
 
     <fx:Declarations>
-        <s:RemoteObject id="consoleService"
+        <mx:RemoteObject id="consoleService"
                         destination="com.zenika.systemmanager.console.service.ConsoleService">
             <mx:method name="getBundles"
                        result="getBundlesResult(event)"
                        fault="onFault(event)"/>
-        </s:RemoteObject>
+        </mx:RemoteObject>
     </fx:Declarations>
 
     <s:VGroup width="100%" height="100%">

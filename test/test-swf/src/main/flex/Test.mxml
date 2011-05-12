@@ -76,19 +76,18 @@
 
         public function stop():void {
             GraniteClassRegistry.unregisterClasses("com.zenika.systemmanager.test.service.TestService");
-            // Do nothing
         }
         ]]>
 	</fx:Script>
 
     <fx:Declarations>
-        <s:RemoteObject id="testBisService"
+        <mx:RemoteObject id="testBisService"
                         destination="com.zenika.systemmanager.test.service.TestService">
             <mx:method name="setObject"
                        result="ret(event)"
                        fault="onFault(event)">
             </mx:method>
-        </s:RemoteObject>
+        </mx:RemoteObject>
     </fx:Declarations>
 
     <s:VGroup width="100%" height="100%">

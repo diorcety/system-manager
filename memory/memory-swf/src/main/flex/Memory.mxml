@@ -74,12 +74,12 @@
 	</fx:Script>
 
     <fx:Declarations>
-        <s:RemoteObject id="memoryService"
+        <mx:RemoteObject id="memoryService"
                         destination="com.zenika.systemmanager.memory.service.MemoryService">
             <mx:method name="getMemoryUsage"
                        result="getMemoryUsageResult(event)"
                        fault="onFault(event)"/>
-        </s:RemoteObject>
+        </mx:RemoteObject>
 
         <mx:DateFormatter id="dateFormatter" formatString="J:NN:SS"/>
     </fx:Declarations>
