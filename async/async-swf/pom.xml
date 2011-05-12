@@ -50,9 +50,9 @@
             <type>swf</type>
         </dependency>
         <dependency>
-            <groupId>org.graniteds</groupId>
+            <groupId>org.graniteds-osgi</groupId>
             <artifactId>granite-swc</artifactId>
-            <version>2.2.0.SP2</version>
+            <version>1.0.0-SNAPSHOT</version>
             <type>swc</type>
         </dependency>
     </dependencies>
