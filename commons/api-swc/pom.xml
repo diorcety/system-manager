@@ -6,7 +6,7 @@
 
     <parent>
         <groupId>com.zenika.systemmanager</groupId>
-        <artifactId>parent</artifactId>
+        <artifactId>commons</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 

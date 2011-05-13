@@ -105,7 +105,8 @@ public class ConsoleServiceImpl implements ConsoleService, GraniteDestination {
         for (Bundle bundle : bundles) {
             BundleInformation bundleInformation = new BundleInformation();
             bundleInformation.setId(String.valueOf(bundle.getBundleId()));
-            bundleInformation.setName(bundle.getHeaders().get(org.osgi.framework.Constants.BUNDLE_NAME).toString());
+            String name = (String) bundle.getHeaders().get(org.osgi.framework.Constants.BUNDLE_NAME);
+            bundleInformation.setName(name != null ? name : bundle.getSymbolicName());
             bundleInformation.setState(getState(bundle.getState()));
             bundleInformation.setVersion(bundle.getVersion().toString());
             bundleInformationList.add(bundleInformation);
