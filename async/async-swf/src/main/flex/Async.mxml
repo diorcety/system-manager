@@ -36,11 +36,13 @@
         import org.granite.gravity.Consumer;
         import org.granite.gravity.Producer;
         import org.granite.gravity.channels.GravityOSGiChannel;
+        import org.granite.util.GraniteClassRegistry;
 
         private var consumer:Consumer = null;
         private var producer:Producer = null;
 
         public function start():void {
+            GraniteClassRegistry.registerClasses("SystemManagerAsync", [ChatEntry]);
             var channelSet:ChannelSet = new ChannelSet();
             var channel:GravityOSGiChannel = new GravityOSGiChannel("SystemManagerGravityChannel", "/WebContent/graniteamf/gravity");
             channelSet.addChannel(channel);
@@ -59,6 +61,7 @@
         }
 
         public function stop():void {
+            GraniteClassRegistry.unregisterClasses("SystemManagerAsync");
             consumer.unsubscribe();
             consumer.disconnect();
             consumer = null;
