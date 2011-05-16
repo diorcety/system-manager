@@ -130,14 +130,12 @@ public class SWFModulesServiceImpl implements SWFModulesService, GraniteDestinat
             Dictionary properties = new Hashtable();
             properties.put("ID", getId());
             properties.put("SERVICE", Constants.GRANITE_SERVICE);
-            properties.put("CHANNELS", new String[]{Constants.GRANITE_CHANNEL});
             granite_destination = destinationFactory.createComponentInstance(properties);
         }
         {
             Dictionary properties = new Hashtable();
             properties.put("ID", GRAVITY_DESTINATION);
             properties.put("SERVICE", Constants.GRAVITY_SERVICE);
-            properties.put("CHANNELS", new String[]{Constants.GRAVITY_CHANNEL});
             gravity_destination = destinationFactory.createComponentInstance(properties);
         }
 

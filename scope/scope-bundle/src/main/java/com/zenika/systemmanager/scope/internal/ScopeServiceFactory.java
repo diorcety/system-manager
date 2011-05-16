@@ -64,7 +64,6 @@ public class ScopeServiceFactory implements GraniteFactory {
             Dictionary properties = new Hashtable();
             properties.put("ID", "com.zenika.systemmanager.test.service.ScopeServiceSession");
             properties.put("SERVICE", Constants.GRANITE_SERVICE);
-            properties.put("CHANNELS", new String[]{Constants.GRANITE_CHANNEL});
             properties.put("FACTORY", getId());
             properties.put("SCOPE", GraniteDestination.SCOPE.SESSION);
             destination1 = destinationFactory.createComponentInstance(properties);
@@ -73,7 +72,6 @@ public class ScopeServiceFactory implements GraniteFactory {
             Dictionary properties = new Hashtable();
             properties.put("ID", "com.zenika.systemmanager.test.service.ScopeServiceRequest");
             properties.put("SERVICE", Constants.GRANITE_SERVICE);
-            properties.put("CHANNELS", new String[]{Constants.GRANITE_CHANNEL});
             properties.put("FACTORY", getId());
             properties.put("SCOPE", GraniteDestination.SCOPE.REQUEST);
             destination2 = destinationFactory.createComponentInstance(properties);
@@ -82,7 +80,6 @@ public class ScopeServiceFactory implements GraniteFactory {
             Dictionary properties = new Hashtable();
             properties.put("ID", "com.zenika.systemmanager.test.service.ScopeServiceApplication");
             properties.put("SERVICE", Constants.GRANITE_SERVICE);
-            properties.put("CHANNELS", new String[]{Constants.GRANITE_CHANNEL});
             properties.put("FACTORY", getId());
             properties.put("SCOPE", GraniteDestination.SCOPE.APPLICATION);
             destination3 = destinationFactory.createComponentInstance(properties);

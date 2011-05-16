@@ -71,7 +71,6 @@ public class GeneralServiceImpl implements GeneralService, GraniteDestination {
             Dictionary properties = new Hashtable();
             properties.put("ID", getId());
             properties.put("SERVICE", Constants.GRANITE_SERVICE);
-            properties.put("CHANNELS", new String[]{Constants.GRANITE_CHANNEL});
             destination = destinationFactory.createComponentInstance(properties);
         }
     }

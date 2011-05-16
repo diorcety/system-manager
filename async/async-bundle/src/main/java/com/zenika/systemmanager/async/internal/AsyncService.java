@@ -99,7 +99,6 @@ public class AsyncService {
             Dictionary properties = new Hashtable();
             properties.put("ID", GRAVITY_DESTINATION);
             properties.put("SERVICE", Constants.GRAVITY_SERVICE);
-            properties.put("CHANNELS", new String[]{Constants.GRAVITY_CHANNEL});
             gravity_destination = destinationFactory.createComponentInstance(properties);
         }
         {
