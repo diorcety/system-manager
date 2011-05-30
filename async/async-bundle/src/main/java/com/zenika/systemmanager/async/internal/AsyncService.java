@@ -35,6 +35,7 @@ import org.apache.felix.ipojo.annotations.Validate;
 import org.apache.felix.ipojo.handlers.event.publisher.Publisher;
 
 import org.granite.gravity.osgi.adapters.ea.EAConstants;
+import org.granite.osgi.ConfigurationHelper;
 import org.granite.osgi.GraniteClassRegistry;
 
 import org.osgi.service.event.Event;
@@ -46,8 +47,8 @@ import java.util.Hashtable;
 @Instantiate
 public class AsyncService {
 
-    @Requires(from = "org.granite.config.flex.Destination")
-    Factory destinationFactory;
+    @Requires
+    ConfigurationHelper confHelper;
 
     @Requires(from = "org.granite.gravity.osgi.adapters.ea.configuration")
     Factory eaFactory;
@@ -95,17 +96,12 @@ public class AsyncService {
     void start() throws MissingHandlerException, ConfigurationException, UnacceptableConfiguration {
         gcr.registerClasses(GRAVITY_DESTINATION, new Class[]{ChatEntry.class});
 
-        {
-            Dictionary properties = new Hashtable();
-            properties.put("ID", GRAVITY_DESTINATION);
-            properties.put("SERVICE", Constants.GRAVITY_SERVICE);
-            gravity_destination = destinationFactory.createComponentInstance(properties);
-        }
-        {
-            Dictionary properties = new Hashtable();
-            properties.put("destination", GRAVITY_DESTINATION);
-            ea_config = eaFactory.createComponentInstance(properties);
-        }
+        gravity_destination = confHelper.newGravityDestination(GRAVITY_DESTINATION, Constants.GRAVITY_SERVICE);
+
+        Dictionary properties = new Hashtable();
+        properties.put("destination", GRAVITY_DESTINATION);
+        ea_config = eaFactory.createComponentInstance(properties);
+
         thread = new TheadPublisher(publisher);
         thread.start();
     }

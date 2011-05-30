@@ -38,6 +38,7 @@ import org.apache.felix.ipojo.annotations.Unbind;
 import org.apache.felix.ipojo.annotations.Validate;
 import org.apache.felix.ipojo.handlers.event.publisher.Publisher;
 
+import org.granite.osgi.ConfigurationHelper;
 import org.granite.osgi.GraniteClassRegistry;
 import org.granite.osgi.service.GraniteDestination;
 
@@ -64,8 +65,8 @@ import java.util.List;
 @Provides
 public class SWFModulesServiceImpl implements SWFModulesService, GraniteDestination {
 
-    @Requires(from = "org.granite.config.flex.Destination")
-    Factory destinationFactory;
+    @Requires
+    ConfigurationHelper confHelper;
 
     @Requires(from = "org.granite.gravity.osgi.adapters.ea.configuration")
     Factory eaFactory;
@@ -121,23 +122,13 @@ public class SWFModulesServiceImpl implements SWFModulesService, GraniteDestinat
     public void start() throws MissingHandlerException, ConfigurationException, UnacceptableConfiguration {
         gcr.registerClasses(GRAVITY_DESTINATION, new Class[]{SWFModule.class});
         gcr.registerClasses(getId(), new Class[]{SWFModule.class});
-        {
-            Dictionary properties = new Hashtable();
-            properties.put("destination", GRAVITY_DESTINATION);
-            ea_config = eaFactory.createComponentInstance(properties);
-        }
-        {
-            Dictionary properties = new Hashtable();
-            properties.put("ID", getId());
-            properties.put("SERVICE", Constants.GRANITE_SERVICE);
-            granite_destination = destinationFactory.createComponentInstance(properties);
-        }
-        {
-            Dictionary properties = new Hashtable();
-            properties.put("ID", GRAVITY_DESTINATION);
-            properties.put("SERVICE", Constants.GRAVITY_SERVICE);
-            gravity_destination = destinationFactory.createComponentInstance(properties);
-        }
+
+        Dictionary properties = new Hashtable();
+        properties.put("destination", GRAVITY_DESTINATION);
+        ea_config = eaFactory.createComponentInstance(properties);
+
+        granite_destination = confHelper.newGraniteDestination(getId(), Constants.GRANITE_SERVICE);
+        gravity_destination = confHelper.newGravityDestination(GRAVITY_DESTINATION, Constants.GRAVITY_SERVICE);
 
         bundleTracker = new BundleTracker(bundleContext, Bundle.ACTIVE, null) {
             public Object addingBundle(Bundle bundle, BundleEvent event) {

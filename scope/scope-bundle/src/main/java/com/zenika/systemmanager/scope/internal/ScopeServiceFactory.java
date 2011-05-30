@@ -32,6 +32,7 @@ import org.apache.felix.ipojo.annotations.Provides;
 import org.apache.felix.ipojo.annotations.Requires;
 import org.apache.felix.ipojo.annotations.Validate;
 
+import org.granite.osgi.ConfigurationHelper;
 import org.granite.osgi.service.GraniteDestination;
 import org.granite.osgi.service.GraniteFactory;
 
@@ -45,45 +46,18 @@ import java.util.LinkedList;
 @Provides
 public class ScopeServiceFactory implements GraniteFactory {
 
-    @Requires(from = "org.granite.config.flex.Factory")
-    Factory factoryFactory;
-
-    @Requires(from = "org.granite.config.flex.Destination")
-    Factory destinationFactory;
+    @Requires
+    ConfigurationHelper confHelper;
 
     ComponentInstance factory, destination1, destination2, destination3;
 
     @Validate
     void start() throws MissingHandlerException, ConfigurationException, UnacceptableConfiguration {
-        {
-            Dictionary properties = new Hashtable();
-            properties.put("ID", getId());
-            factory = factoryFactory.createComponentInstance(properties);
-        }
-        {
-            Dictionary properties = new Hashtable();
-            properties.put("ID", "com.zenika.systemmanager.test.service.ScopeServiceSession");
-            properties.put("SERVICE", Constants.GRANITE_SERVICE);
-            properties.put("FACTORY", getId());
-            properties.put("SCOPE", GraniteDestination.SCOPE.SESSION);
-            destination1 = destinationFactory.createComponentInstance(properties);
-        }
-        {
-            Dictionary properties = new Hashtable();
-            properties.put("ID", "com.zenika.systemmanager.test.service.ScopeServiceRequest");
-            properties.put("SERVICE", Constants.GRANITE_SERVICE);
-            properties.put("FACTORY", getId());
-            properties.put("SCOPE", GraniteDestination.SCOPE.REQUEST);
-            destination2 = destinationFactory.createComponentInstance(properties);
-        }
-        {
-            Dictionary properties = new Hashtable();
-            properties.put("ID", "com.zenika.systemmanager.test.service.ScopeServiceApplication");
-            properties.put("SERVICE", Constants.GRANITE_SERVICE);
-            properties.put("FACTORY", getId());
-            properties.put("SCOPE", GraniteDestination.SCOPE.APPLICATION);
-            destination3 = destinationFactory.createComponentInstance(properties);
-        }
+        factory = confHelper.newFactory(getId());
+
+        destination1 = confHelper.newGraniteDestination("com.zenika.systemmanager.test.service.ScopeServiceSession", Constants.GRANITE_SERVICE, getId(), ConfigurationHelper.SCOPE.SESSION);
+        destination2 = confHelper.newGraniteDestination("com.zenika.systemmanager.test.service.ScopeServiceRequest", Constants.GRANITE_SERVICE, getId(), ConfigurationHelper.SCOPE.REQUEST);
+        destination3 = confHelper.newGraniteDestination("com.zenika.systemmanager.test.service.ScopeServiceApplication", Constants.GRANITE_SERVICE, getId(), ConfigurationHelper.SCOPE.APPLICATION);
     }
 
     @Invalidate

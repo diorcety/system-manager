@@ -33,6 +33,7 @@ import org.apache.felix.ipojo.annotations.Requires;
 import org.apache.felix.ipojo.annotations.Validate;
 
 import org.granite.gravity.osgi.adapters.ea.EAConstants;
+import org.granite.osgi.ConfigurationHelper;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -41,11 +42,9 @@ import java.util.Hashtable;
 @Component
 @Instantiate
 public class Activator {
-    @Requires(from = "org.granite.config.flex.Service")
-    Factory serviceFactory;
 
-    @Requires(from = "org.granite.config.flex.Channel")
-    Factory channelFactory;
+    @Requires
+    ConfigurationHelper confHelper;
 
     ComponentInstance granite_service, granite_channel;
     ComponentInstance gravity_service, gravity_channel;
@@ -54,33 +53,12 @@ public class Activator {
     void start() throws MissingHandlerException, ConfigurationException, UnacceptableConfiguration {
 
         // Gravity
-        {
-            Dictionary properties = new Hashtable();
-            properties.put("ID", Constants.GRAVITY_SERVICE);
-            properties.put("MESSAGETYPES", "flex.messaging.messages.AsyncMessage");
-            properties.put("DEFAULT_ADAPTER", EAConstants.ADAPTER_ID);
-            gravity_service = serviceFactory.createComponentInstance(properties);
-        }
-        {
-            Dictionary properties = new Hashtable();
-            properties.put("ID", Constants.GRAVITY_CHANNEL);
-            properties.put("CLASS", "org.granite.gravity.channels.GravityChannel");
-            properties.put("ENDPOINT_URI", Constants.GRAVITY_CHANNEL_URI);
-            gravity_channel = channelFactory.createComponentInstance(properties);
-        }
+        gravity_service = confHelper.newGravityService(Constants.GRAVITY_SERVICE, EAConstants.ADAPTER_ID);
+        gravity_channel = confHelper.newGravityChannel(Constants.GRAVITY_CHANNEL, Constants.GRAVITY_CHANNEL_URI);
 
         // GraniteDS
-        {
-            Dictionary properties = new Hashtable();
-            properties.put("ID", Constants.GRANITE_SERVICE);
-            granite_service = serviceFactory.createComponentInstance(properties);
-        }
-        {
-            Dictionary properties = new Hashtable();
-            properties.put("ID", Constants.GRANITE_CHANNEL);
-            properties.put("ENDPOINT_URI", Constants.GRANITE_CHANNEL_URI);
-            granite_channel = channelFactory.createComponentInstance(properties);
-        }
+        granite_service = confHelper.newGraniteService(Constants.GRANITE_SERVICE);
+        granite_channel = confHelper.newGraniteChannel(Constants.GRANITE_CHANNEL, Constants.GRANITE_CHANNEL_URI);
     }
 
     @Invalidate
