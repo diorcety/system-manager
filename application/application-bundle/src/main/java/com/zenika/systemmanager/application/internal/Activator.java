@@ -34,6 +34,10 @@ import org.apache.felix.ipojo.annotations.Validate;
 
 import org.granite.gravity.osgi.adapters.ea.EAConstants;
 import org.granite.osgi.ConfigurationHelper;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.http.HttpContext;
+import org.osgi.service.http.HttpService;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -46,19 +50,35 @@ public class Activator {
     @Requires
     ConfigurationHelper confHelper;
 
+    @Requires
+    HttpService httpService;
+
     ComponentInstance granite_service, granite_channel;
     ComponentInstance gravity_service, gravity_channel;
+    ServiceRegistration httpContext;
+
+    BundleContext bundleContext;
+
+    Activator(BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
+    }
+
 
     @Validate
     void start() throws MissingHandlerException, ConfigurationException, UnacceptableConfiguration {
 
+        // New Context
+        Dictionary dictionary = new Hashtable();
+        dictionary.put("ID", "SystemManagerContext");
+        httpContext = bundleContext.registerService(HttpContext.class.getName(), httpService.createDefaultHttpContext(), dictionary);
+
         // Gravity
         gravity_service = confHelper.newGravityService(Constants.GRAVITY_SERVICE, EAConstants.ADAPTER_ID);
-        gravity_channel = confHelper.newGravityChannel(Constants.GRAVITY_CHANNEL, Constants.GRAVITY_CHANNEL_URI);
+        gravity_channel = confHelper.newGravityChannel(Constants.GRAVITY_CHANNEL, Constants.GRAVITY_CHANNEL_URI, "SystemManagerContext");
 
         // GraniteDS
         granite_service = confHelper.newGraniteService(Constants.GRANITE_SERVICE);
-        granite_channel = confHelper.newGraniteChannel(Constants.GRANITE_CHANNEL, Constants.GRANITE_CHANNEL_URI);
+        granite_channel = confHelper.newGraniteChannel(Constants.GRANITE_CHANNEL, Constants.GRANITE_CHANNEL_URI, "SystemManagerContext");
     }
 
     @Invalidate
@@ -68,5 +88,7 @@ public class Activator {
 
         gravity_channel.dispose();
         gravity_service.dispose();
+
+        httpContext.unregister();
     }
 }
