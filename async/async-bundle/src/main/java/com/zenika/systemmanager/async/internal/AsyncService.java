@@ -22,11 +22,6 @@ package com.zenika.systemmanager.async.internal;
 
 import com.zenika.systemmanager.async.service.ChatEntry;
 
-import org.apache.felix.ipojo.ComponentInstance;
-import org.apache.felix.ipojo.ConfigurationException;
-import org.apache.felix.ipojo.Factory;
-import org.apache.felix.ipojo.MissingHandlerException;
-import org.apache.felix.ipojo.UnacceptableConfiguration;
 import org.apache.felix.ipojo.annotations.Component;
 import org.apache.felix.ipojo.annotations.Instantiate;
 import org.apache.felix.ipojo.annotations.Invalidate;
@@ -35,23 +30,21 @@ import org.apache.felix.ipojo.annotations.Validate;
 import org.apache.felix.ipojo.handlers.event.publisher.Publisher;
 
 import org.granite.gravity.osgi.adapters.ea.EAConstants;
-import org.granite.osgi.ConfigurationHelper;
 import org.granite.osgi.GraniteClassRegistry;
 
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.event.Event;
 
+import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
 @Component
 @Instantiate
 public class AsyncService {
-
     @Requires
-    ConfigurationHelper confHelper;
-
-    @Requires(from = "org.granite.gravity.osgi.adapters.ea.configuration")
-    Factory eaFactory;
+    ConfigurationAdmin configurationAdmin;
 
     @Requires
     GraniteClassRegistry gcr;
@@ -63,7 +56,7 @@ public class AsyncService {
 
     private Publisher publisher;
 
-    ComponentInstance gravity_destination, ea_config;
+    Configuration gravity_destination, ea_config;
 
     private final static String GRAVITY_DESTINATION = "SystemManagerAsync";
 
@@ -93,28 +86,35 @@ public class AsyncService {
     TheadPublisher thread;
 
     @Validate
-    void start() throws MissingHandlerException, ConfigurationException, UnacceptableConfiguration {
+    void start() throws IOException {
         gcr.registerClasses(GRAVITY_DESTINATION, new Class[]{ChatEntry.class});
 
-        gravity_destination = confHelper.newGravityDestination(GRAVITY_DESTINATION, Constants.GRAVITY_SERVICE);
-
-        Dictionary properties = new Hashtable();
-        properties.put("destination", GRAVITY_DESTINATION);
-        ea_config = eaFactory.createComponentInstance(properties);
-
+        {
+            Dictionary properties = new Hashtable();
+            properties.put("id", GRAVITY_DESTINATION);
+            properties.put("service", Constants.GRAVITY_SERVICE);
+            gravity_destination = configurationAdmin.createFactoryConfiguration("org.granite.config.flex.Destination", null);
+            gravity_destination.update(properties);
+        }
+        {
+            Dictionary properties = new Hashtable();
+            properties.put("destination", GRAVITY_DESTINATION);
+            ea_config = configurationAdmin.createFactoryConfiguration("org.granite.gravity.osgi.adapters.ea.configuration", null);
+            ea_config.update(properties);
+        }
         thread = new TheadPublisher(publisher);
         thread.start();
     }
 
     @Invalidate
-    void stop() {
+    void stop() throws IOException {
         try {
             thread.stop();
         } catch (Exception e) {
         }
 
-        gravity_destination.dispose();
-        ea_config.dispose();
+        gravity_destination.delete();
+        ea_config.delete();
 
         gcr.unregisterClasses(GRAVITY_DESTINATION);
     }

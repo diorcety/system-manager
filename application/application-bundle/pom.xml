@@ -61,11 +61,6 @@
             <version>1.6.0</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.ipojo</artifactId>
-            <scope>provided</scope>
-        </dependency>
     </dependencies>
 
     <build>

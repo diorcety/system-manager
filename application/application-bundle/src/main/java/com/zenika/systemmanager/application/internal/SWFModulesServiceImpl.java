@@ -23,11 +23,6 @@ package com.zenika.systemmanager.application.internal;
 import com.zenika.systemmanager.application.service.SWFModule;
 import com.zenika.systemmanager.application.service.SWFModulesService;
 
-import org.apache.felix.ipojo.ComponentInstance;
-import org.apache.felix.ipojo.ConfigurationException;
-import org.apache.felix.ipojo.Factory;
-import org.apache.felix.ipojo.MissingHandlerException;
-import org.apache.felix.ipojo.UnacceptableConfiguration;
 import org.apache.felix.ipojo.annotations.Bind;
 import org.apache.felix.ipojo.annotations.Component;
 import org.apache.felix.ipojo.annotations.Instantiate;
@@ -38,18 +33,20 @@ import org.apache.felix.ipojo.annotations.Unbind;
 import org.apache.felix.ipojo.annotations.Validate;
 import org.apache.felix.ipojo.handlers.event.publisher.Publisher;
 
-import org.granite.osgi.ConfigurationHelper;
 import org.granite.osgi.GraniteClassRegistry;
 import org.granite.osgi.service.GraniteDestination;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.BundleTracker;
 
+import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.LinkedList;
@@ -66,15 +63,12 @@ import java.util.List;
 public class SWFModulesServiceImpl implements SWFModulesService, GraniteDestination {
 
     @Requires
-    ConfigurationHelper confHelper;
-
-    @Requires(from = "org.granite.gravity.osgi.adapters.ea.configuration")
-    Factory eaFactory;
+    ConfigurationAdmin configurationAdmin;
 
     @Requires
     GraniteClassRegistry gcr;
 
-    ComponentInstance granite_destination, gravity_destination, ea_config;
+    Configuration granite_destination, gravity_destination, ea_config;
 
     @org.apache.felix.ipojo.handlers.event.Publisher(
             name = "AsyncPublisher",
@@ -119,16 +113,30 @@ public class SWFModulesServiceImpl implements SWFModulesService, GraniteDestinat
      * Register resources for SWF modules and listen to resources arrival/departures
      */
     @Validate
-    public void start() throws MissingHandlerException, ConfigurationException, UnacceptableConfiguration {
+    public void start() throws IOException {
         gcr.registerClasses(GRAVITY_DESTINATION, new Class[]{SWFModule.class});
         gcr.registerClasses(getId(), new Class[]{SWFModule.class});
+        {
+            Dictionary properties = new Hashtable();
+            properties.put("destination", GRAVITY_DESTINATION);
+            ea_config = configurationAdmin.createFactoryConfiguration("org.granite.gravity.osgi.adapters.ea.configuration", null);
+            ea_config.update(properties);
 
-        Dictionary properties = new Hashtable();
-        properties.put("destination", GRAVITY_DESTINATION);
-        ea_config = eaFactory.createComponentInstance(properties);
-
-        granite_destination = confHelper.newGraniteDestination(getId(), Constants.GRANITE_SERVICE);
-        gravity_destination = confHelper.newGravityDestination(GRAVITY_DESTINATION, Constants.GRAVITY_SERVICE);
+        }
+        {
+            Dictionary properties = new Hashtable();
+            properties.put("id", getId());
+            properties.put("service", Constants.GRANITE_SERVICE);
+            granite_destination = configurationAdmin.createFactoryConfiguration("org.granite.config.flex.Destination", null);
+            granite_destination.update(properties);
+        }
+        {
+            Dictionary properties = new Hashtable();
+            properties.put("id", GRAVITY_DESTINATION);
+            properties.put("service", Constants.GRAVITY_SERVICE);
+            gravity_destination = configurationAdmin.createFactoryConfiguration("org.granite.config.flex.Destination", null);
+            gravity_destination.update(properties);
+        }
 
         bundleTracker = new BundleTracker(bundleContext, Bundle.ACTIVE, null) {
             public Object addingBundle(Bundle bundle, BundleEvent event) {
@@ -148,10 +156,10 @@ public class SWFModulesServiceImpl implements SWFModulesService, GraniteDestinat
     }
 
     @Invalidate
-    public void stop() {
-        granite_destination.dispose();
-        gravity_destination.dispose();
-        ea_config.dispose();
+    public void stop() throws IOException{
+        granite_destination.delete();
+        gravity_destination.delete();
+        ea_config.delete();
 
         // Stops tracking SWF Modules
         bundleTracker.close();

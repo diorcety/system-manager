@@ -23,11 +23,6 @@ package com.zenika.systemmanager.test.internal;
 import com.zenika.systemmanager.test.service.TestClass;
 import com.zenika.systemmanager.test.service.Test2Service;
 
-import org.apache.felix.ipojo.ComponentInstance;
-import org.apache.felix.ipojo.ConfigurationException;
-import org.apache.felix.ipojo.Factory;
-import org.apache.felix.ipojo.MissingHandlerException;
-import org.apache.felix.ipojo.UnacceptableConfiguration;
 import org.apache.felix.ipojo.annotations.Component;
 import org.apache.felix.ipojo.annotations.Instantiate;
 import org.apache.felix.ipojo.annotations.Invalidate;
@@ -35,10 +30,12 @@ import org.apache.felix.ipojo.annotations.Provides;
 import org.apache.felix.ipojo.annotations.Requires;
 import org.apache.felix.ipojo.annotations.Validate;
 
-import org.granite.osgi.ConfigurationHelper;
 import org.granite.osgi.GraniteClassRegistry;
 import org.granite.osgi.service.GraniteDestination;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -48,24 +45,31 @@ import java.util.LinkedList;
 @Instantiate
 @Provides
 public class Test2ServiceImpl implements Test2Service, GraniteDestination {
-    ComponentInstance destination;
 
     @Requires
-    ConfigurationHelper confHelper;
+    ConfigurationAdmin configurationAdmin;
 
     @Requires
     GraniteClassRegistry gcr;
 
+    Configuration destination;
+
     @Validate
-    void start() throws MissingHandlerException, ConfigurationException, UnacceptableConfiguration {
+    void start() throws IOException {
         gcr.registerClasses(getId(), new Class[]{TestClass.class});
 
-        destination = confHelper.newGraniteDestination(getId(), Constants.GRANITE_SERVICE);
+        {
+            Dictionary properties = new Hashtable();
+            properties.put("id", getId());
+            properties.put("service", Constants.GRANITE_SERVICE);
+            destination = configurationAdmin.createFactoryConfiguration("org.granite.config.flex.Destination", null);
+            destination.update(properties);
+        }
     }
 
     @Invalidate
-    public void stop() {
-        destination.dispose();
+    public void stop() throws IOException {
+        destination.delete();
 
         gcr.unregisterClasses(getId());
     }

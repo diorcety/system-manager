@@ -20,11 +20,6 @@
 
 package com.zenika.systemmanager.scope.internal;
 
-import org.apache.felix.ipojo.ComponentInstance;
-import org.apache.felix.ipojo.ConfigurationException;
-import org.apache.felix.ipojo.Factory;
-import org.apache.felix.ipojo.MissingHandlerException;
-import org.apache.felix.ipojo.UnacceptableConfiguration;
 import org.apache.felix.ipojo.annotations.Component;
 import org.apache.felix.ipojo.annotations.Instantiate;
 import org.apache.felix.ipojo.annotations.Invalidate;
@@ -32,10 +27,12 @@ import org.apache.felix.ipojo.annotations.Provides;
 import org.apache.felix.ipojo.annotations.Requires;
 import org.apache.felix.ipojo.annotations.Validate;
 
-import org.granite.osgi.ConfigurationHelper;
 import org.granite.osgi.service.GraniteDestination;
 import org.granite.osgi.service.GraniteFactory;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -47,25 +44,53 @@ import java.util.LinkedList;
 public class ScopeServiceFactory implements GraniteFactory {
 
     @Requires
-    ConfigurationHelper confHelper;
+    ConfigurationAdmin configurationAdmin;
 
-    ComponentInstance factory, destination1, destination2, destination3;
+    Configuration factory, destination1, destination2, destination3;
 
     @Validate
-    void start() throws MissingHandlerException, ConfigurationException, UnacceptableConfiguration {
-        factory = confHelper.newFactory(getId());
-
-        destination1 = confHelper.newGraniteDestination("com.zenika.systemmanager.test.service.ScopeServiceSession", Constants.GRANITE_SERVICE, getId(), ConfigurationHelper.SCOPE.SESSION);
-        destination2 = confHelper.newGraniteDestination("com.zenika.systemmanager.test.service.ScopeServiceRequest", Constants.GRANITE_SERVICE, getId(), ConfigurationHelper.SCOPE.REQUEST);
-        destination3 = confHelper.newGraniteDestination("com.zenika.systemmanager.test.service.ScopeServiceApplication", Constants.GRANITE_SERVICE, getId(), ConfigurationHelper.SCOPE.APPLICATION);
+    void start() throws IOException {
+        {
+            Dictionary properties = new Hashtable();
+            properties.put("id", getId());
+            factory = configurationAdmin.createFactoryConfiguration("org.granite.config.flex.Factory", null);
+            factory.update(properties);
+        }
+        {
+            Dictionary properties = new Hashtable();
+            properties.put("id", "com.zenika.systemmanager.test.service.ScopeServiceSession");
+            properties.put("service", Constants.GRANITE_SERVICE);
+            properties.put("factory", getId());
+            properties.put("scope", "session");
+            destination1 = configurationAdmin.createFactoryConfiguration("org.granite.config.flex.Destination", null);
+            destination1.update(properties);
+        }
+        {
+            Dictionary properties = new Hashtable();
+            properties.put("id", "com.zenika.systemmanager.test.service.ScopeServiceRequest");
+            properties.put("service", Constants.GRANITE_SERVICE);
+            properties.put("factory", getId());
+            properties.put("scope", "request");
+            destination2 = configurationAdmin.createFactoryConfiguration("org.granite.config.flex.Destination", null);
+            destination2.update(properties);
+        }
+        {
+            Dictionary properties = new Hashtable();
+            properties.put("id", "com.zenika.systemmanager.test.service.ScopeServiceApplication");
+            properties.put("service", Constants.GRANITE_SERVICE);
+            properties.put("factory", getId());
+            properties.put("scope", "application");
+            destination3 = configurationAdmin.createFactoryConfiguration("org.granite.config.flex.Destination", null);
+            destination3.update(properties);
+        }
     }
 
     @Invalidate
-    void stop() {
-        destination1.dispose();
-        destination2.dispose();
-        destination3.dispose();
-        factory.dispose();
+    void stop() throws IOException {
+        destination1.delete();
+        destination2.delete();
+        destination3.delete();
+        factory.delete();
     }
 
     @Override

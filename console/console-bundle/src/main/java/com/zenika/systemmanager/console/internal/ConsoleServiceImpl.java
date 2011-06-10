@@ -23,11 +23,6 @@ package com.zenika.systemmanager.console.internal;
 import com.zenika.systemmanager.console.service.BundleInformation;
 import com.zenika.systemmanager.console.service.ConsoleService;
 
-import org.apache.felix.ipojo.ComponentInstance;
-import org.apache.felix.ipojo.ConfigurationException;
-import org.apache.felix.ipojo.Factory;
-import org.apache.felix.ipojo.MissingHandlerException;
-import org.apache.felix.ipojo.UnacceptableConfiguration;
 import org.apache.felix.ipojo.annotations.Component;
 import org.apache.felix.ipojo.annotations.Instantiate;
 import org.apache.felix.ipojo.annotations.Invalidate;
@@ -35,14 +30,15 @@ import org.apache.felix.ipojo.annotations.Provides;
 import org.apache.felix.ipojo.annotations.Requires;
 import org.apache.felix.ipojo.annotations.Validate;
 
-import org.granite.osgi.ConfigurationHelper;
 import org.granite.osgi.GraniteClassRegistry;
 import org.granite.osgi.service.GraniteDestination;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 
-import java.util.Collection;
+import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.LinkedList;
@@ -58,12 +54,12 @@ import java.util.List;
 public class ConsoleServiceImpl implements ConsoleService, GraniteDestination {
 
     @Requires
-    ConfigurationHelper confHelper;
+    ConfigurationAdmin configurationAdmin;
 
     @Requires
     GraniteClassRegistry gcr;
 
-    ComponentInstance destination;
+    Configuration destination;
 
     /**
      * OSGi BundleContext.
@@ -76,15 +72,21 @@ public class ConsoleServiceImpl implements ConsoleService, GraniteDestination {
 
 
     @Validate
-    void start() throws MissingHandlerException, ConfigurationException, UnacceptableConfiguration {
+    void start() throws IOException {
         gcr.registerClasses(getId(), new Class[]{BundleInformation.class});
 
-destination = confHelper.newGraniteDestination(getId(), Constants.GRANITE_SERVICE);
+        {
+            Dictionary properties = new Hashtable();
+            properties.put("id", getId());
+            properties.put("service", Constants.GRANITE_SERVICE);
+            destination = configurationAdmin.createFactoryConfiguration("org.granite.config.flex.Destination", null);
+            destination.update(properties);
+        }
     }
 
     @Invalidate
-    void stop() {
-        destination.dispose();
+    void stop() throws IOException {
+        destination.delete();
 
         gcr.unregisterClasses(getId());
     }

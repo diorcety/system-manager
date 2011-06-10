@@ -21,11 +21,6 @@
 package com.zenika.systemmanager.application.internal;
 
 
-import org.apache.felix.ipojo.ComponentInstance;
-import org.apache.felix.ipojo.ConfigurationException;
-import org.apache.felix.ipojo.Factory;
-import org.apache.felix.ipojo.MissingHandlerException;
-import org.apache.felix.ipojo.UnacceptableConfiguration;
 import org.apache.felix.ipojo.annotations.Component;
 import org.apache.felix.ipojo.annotations.Instantiate;
 import org.apache.felix.ipojo.annotations.Invalidate;
@@ -33,12 +28,15 @@ import org.apache.felix.ipojo.annotations.Requires;
 import org.apache.felix.ipojo.annotations.Validate;
 
 import org.granite.gravity.osgi.adapters.ea.EAConstants;
-import org.granite.osgi.ConfigurationHelper;
+
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 
+import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
@@ -46,15 +44,14 @@ import java.util.Hashtable;
 @Component
 @Instantiate
 public class Activator {
-
     @Requires
-    ConfigurationHelper confHelper;
+    ConfigurationAdmin configurationAdmin;
 
     @Requires
     HttpService httpService;
 
-    ComponentInstance granite_service, granite_channel;
-    ComponentInstance gravity_service, gravity_channel;
+    Configuration granite_service, granite_channel;
+    Configuration gravity_service, gravity_channel;
     ServiceRegistration httpContext;
 
     BundleContext bundleContext;
@@ -65,7 +62,7 @@ public class Activator {
 
 
     @Validate
-    void start() throws MissingHandlerException, ConfigurationException, UnacceptableConfiguration {
+    void start() throws IOException {
 
         // New Context
         Dictionary dictionary = new Hashtable();
@@ -73,21 +70,48 @@ public class Activator {
         httpContext = bundleContext.registerService(HttpContext.class.getName(), httpService.createDefaultHttpContext(), dictionary);
 
         // Gravity
-        gravity_service = confHelper.newGravityService(Constants.GRAVITY_SERVICE, EAConstants.ADAPTER_ID);
-        gravity_channel = confHelper.newGravityChannel(Constants.GRAVITY_CHANNEL, Constants.GRAVITY_CHANNEL_URI, "SystemManagerContext");
+        {
+            Dictionary properties = new Hashtable();
+            properties.put("id", Constants.GRAVITY_SERVICE);
+            properties.put("messageTypes", "flex.messaging.messages.AsyncMessage");
+            properties.put("defaultAdapter", EAConstants.ADAPTER_ID);
+            gravity_service = configurationAdmin.createFactoryConfiguration("org.granite.config.flex.Service", null);
+            gravity_service.update(properties);
+        }
+        {
+            Dictionary properties = new Hashtable();
+            properties.put("id", Constants.GRAVITY_CHANNEL);
+            properties.put("uri", Constants.GRAVITY_CHANNEL_URI);
+            properties.put("context", "SystemManagerContext");
+            properties.put("gravity", "true");
+            gravity_channel = configurationAdmin.createFactoryConfiguration("org.granite.config.flex.Channel", null);
+            gravity_channel.update(properties);
+        }
 
         // GraniteDS
-        granite_service = confHelper.newGraniteService(Constants.GRANITE_SERVICE);
-        granite_channel = confHelper.newGraniteChannel(Constants.GRANITE_CHANNEL, Constants.GRANITE_CHANNEL_URI, "SystemManagerContext");
+        {
+            Dictionary properties = new Hashtable();
+            properties.put("id", Constants.GRANITE_SERVICE);
+            granite_service = configurationAdmin.createFactoryConfiguration("org.granite.config.flex.Service", null);
+            granite_service.update(properties);
+        }
+        {
+            Dictionary properties = new Hashtable();
+            properties.put("id", Constants.GRANITE_CHANNEL);
+            properties.put("uri", Constants.GRANITE_CHANNEL_URI);
+            properties.put("context", "SystemManagerContext");
+            granite_channel = configurationAdmin.createFactoryConfiguration("org.granite.config.flex.Channel", null);
+            granite_channel.update(properties);
+        }
     }
 
     @Invalidate
-    void stop() {
-        granite_service.dispose();
-        granite_channel.dispose();
+    void stop() throws IOException {
+        granite_service.delete();
+        granite_channel.delete();
 
-        gravity_channel.dispose();
-        gravity_service.dispose();
+        gravity_channel.delete();
+        gravity_service.delete();
 
         httpContext.unregister();
     }

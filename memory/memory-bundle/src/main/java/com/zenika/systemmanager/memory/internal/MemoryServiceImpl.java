@@ -22,11 +22,6 @@ package com.zenika.systemmanager.memory.internal;
 
 import com.zenika.systemmanager.memory.service.MemoryService;
 
-import org.apache.felix.ipojo.ComponentInstance;
-import org.apache.felix.ipojo.ConfigurationException;
-import org.apache.felix.ipojo.Factory;
-import org.apache.felix.ipojo.MissingHandlerException;
-import org.apache.felix.ipojo.UnacceptableConfiguration;
 import org.apache.felix.ipojo.annotations.Component;
 import org.apache.felix.ipojo.annotations.Instantiate;
 import org.apache.felix.ipojo.annotations.Invalidate;
@@ -34,9 +29,11 @@ import org.apache.felix.ipojo.annotations.Provides;
 import org.apache.felix.ipojo.annotations.Requires;
 import org.apache.felix.ipojo.annotations.Validate;
 
-import org.granite.osgi.ConfigurationHelper;
 import org.granite.osgi.service.GraniteDestination;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 
+import java.io.IOException;
 import java.lang.management.ManagementFactory;
 
 import java.util.Collection;
@@ -54,18 +51,24 @@ import java.util.LinkedList;
 public class MemoryServiceImpl implements MemoryService, GraniteDestination {
 
     @Requires
-    ConfigurationHelper confHelper;
+    ConfigurationAdmin configurationAdmin;
 
-    ComponentInstance destination;
+    Configuration destination;
 
     @Validate
-    void start() throws MissingHandlerException, ConfigurationException, UnacceptableConfiguration {
-destination = confHelper.newGraniteDestination(getId(), Constants.GRANITE_SERVICE);
+    void start() throws IOException {
+        {
+            Dictionary properties = new Hashtable();
+            properties.put("id", getId());
+            properties.put("service", Constants.GRANITE_SERVICE);
+            destination = configurationAdmin.createFactoryConfiguration("org.granite.config.flex.Destination", null);
+            destination.update(properties);
+        }
     }
 
     @Invalidate
-    void stop() {
-        destination.dispose();
+    void stop() throws IOException {
+        destination.delete();
     }
 
 

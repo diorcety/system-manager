@@ -25,6 +25,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.graniteds-osgi</groupId>
             <artifactId>granite-core</artifactId>
             <scope>provided</scope>
@@ -44,11 +49,6 @@
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.ipojo.handler.eventadmin</artifactId>
             <version>1.6.0</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.ipojo</artifactId>
             <scope>provided</scope>
         </dependency>
     </dependencies>
